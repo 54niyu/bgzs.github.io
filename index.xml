@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bing Bing Blog</title>
+    <link>http://54niyu.github.io/index.xml</link>
+    <description>Recent content on Bing Bing Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <managingEditor>54niyu@sina.com (Bing)</managingEditor>
+    <webMaster>54niyu@sina.com (Bing)</webMaster>
+    <lastBuildDate>Thu, 13 Oct 2016 22:50:01 +0800</lastBuildDate>
+    <atom:link href="http://54niyu.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>welcome</title>
+      <link>http://54niyu.github.io/post/welcome/</link>
+      <pubDate>Thu, 13 Oct 2016 22:50:01 +0800</pubDate>
+      <author>54niyu@sina.com (Bing)</author>
+      <guid>http://54niyu.github.io/post/welcome/</guid>
+      <description>
+
+&lt;h3 id=&#34;hello-world&#34;&gt;Hello World&lt;/h3&gt;
+
+&lt;p&gt;这是我的第一个*Hugo*搭建的博客。&lt;/p&gt;
+
+&lt;p&gt;欢迎浏览&lt;/p&gt;
+
+&lt;p&gt;哈哈哈哈哈哈哈哈好😁😆&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;我是快乐的分割线&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
