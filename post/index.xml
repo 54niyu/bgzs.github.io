@@ -17,16 +17,35 @@
       <pubDate>Thu, 13 Oct 2016 22:50:01 +0800</pubDate>
       <author>54niyu@sina.com (Bing)</author>
       <guid>http://54niyu.github.io/post/welcome/</guid>
-      <description>&lt;p&gt;###Hello World&lt;/p&gt;
+      <description>
+
+&lt;h1 id=&#34;hello-world&#34;&gt;Hello World&lt;/h1&gt;
 
 &lt;hr /&gt;
 
 &lt;pre&gt;&lt;code&gt;哈哈哈哈哈哈哈哈好😁😆
 
-最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面。
+最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合  
+来生成静态页面.
 
-下面就是自己折腾的结果啦。。
+下面就是自己折腾的这个新鲜的工具了。  
+
+第一步要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/spf13/hugo/releases&#34;&gt;Hugo&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;对于linux/unix系统，可以将它放置到/usr/loca/bin 以方便直接在terminal中敲命令
+
+如果是macOs系统并且安装了Homebrew，只需要运行：
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;brew update &amp;amp;&amp;amp; brew install hua&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;当然，如果你熟悉golang的话，也可以选择下载源码安装
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;go get -v github.com/spf13/hugo&lt;/code&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
