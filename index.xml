@@ -12,24 +12,27 @@
     <atom:link href="http://54niyu.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>welcome</title>
+      <title>使用Hugo搭建github静态博客</title>
       <link>http://54niyu.github.io/post/welcome/</link>
       <pubDate>Thu, 13 Oct 2016 22:50:01 +0800</pubDate>
       <author>54niyu@sina.com (Bing)</author>
       <guid>http://54niyu.github.io/post/welcome/</guid>
-      <description>
+      <description>&lt;p&gt;###Hello World&lt;/p&gt;
 
-&lt;h3 id=&#34;hello-world&#34;&gt;Hello World&lt;/h3&gt;
+&lt;hr /&gt;
 
-&lt;p&gt;这是我的第一个*Hugo*搭建的博客。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;哈哈哈哈哈哈哈哈好😁😆
 
-&lt;p&gt;欢迎浏览&lt;/p&gt;
+最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面。
 
-&lt;p&gt;哈哈哈哈哈哈哈哈好😁😆&lt;/p&gt;
+下面就是自己折腾的结果啦。。
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;hr /&gt;
 
 &lt;p&gt;我是快乐的分割线&lt;/p&gt;
+
+&lt;hr /&gt;
 </description>
     </item>
     
