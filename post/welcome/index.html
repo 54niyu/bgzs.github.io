@@ -47,41 +47,181 @@
     <h2 class="subtitle is-6">October 13, 2016</h2>
     <h1 class="title">使用Hugo搭建github静态博客</h1>
     <div class="content">
-      
+      <p>最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.</p>
 
-<h1 id="hello-world">Hello World</h1>
+<p>下面就是自己折腾的这个新鲜的工具了。</p>
 
 <hr />
 
-<pre><code>哈哈哈哈哈哈哈哈好😁😆
+<ol>
+<li><strong>安装</strong></li>
+</ol>
 
-最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合  
-来生成静态页面.
-
-下面就是自己折腾的这个新鲜的工具了。  
-
-第一步要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可
-</code></pre>
+<p>要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可</p>
 
 <p><a href="https://github.com/spf13/hugo/releases">Hugo</a></p>
 
-<pre><code>对于linux/unix系统，可以将它放置到/usr/loca/bin 以方便直接在terminal中敲命令
+<p>对于linux/unix系统，可以将它放置到/usr/loca/bin 以方便直接在terminal中敲命令</p>
 
-如果是macOs系统并且安装了Homebrew，只需要运行：
-</code></pre>
+<p>如果是macOs系统并且安装了Homebrew，只需要运行:</p>
 
-<p><code>brew update &amp;&amp; brew install hua</code></p>
+<p><code>brew update &amp;&amp; brew install hugo</code></p>
 
-<pre><code>当然，如果你熟悉golang的话，也可以选择下载源码安装
-</code></pre>
+<p>当然，如果你熟悉golang的话，也可以选择下载源码安装</p>
 
 <p><code>go get -v github.com/spf13/hugo</code></p>
 
-<hr />
+<p>你可以在终端输入 <code>hugo version</code> 来测试安装结果</p>
 
-<p>我是快乐的分割线</p>
+<p><code>Hugo Static Site Generator v0.17 BuildDate: 2016-10-07T22:42:05+08:00</code></p>
 
-<hr />
+<ol>
+<li><strong>搭建Site架构</strong></li>
+</ol>
+
+<p><code>hugo new site mysite</code> 会在当前目录下创建一个 mysite目录，里面包含了hugo生成的必要文件和文件夹</p>
+
+<p><code>cd mysite &amp;&amp; tree -a</code></p>
+
+<pre><code>.
+|-- archetypes
+|-- config.toml
+|-- content
+|-- data
+|-- layouts
+|-- static
+|-- themes
+</code></pre>
+
+<ul>
+<li><p>archetypes</p>
+
+<p>你可以使用 hugo new 命令创建一个文章内容，每个文章内容包括一些配置在文件的首部 ，archetypes允许为你生成的文章定义自己的配置属性（包括 日志 题目。。）</p></li>
+
+<li><p>config.tomal</p>
+
+<p>网站的配置文件,默认的配置文件使用的是 TOML 格式，你也可以使用 YAML 或者 JSON。配置文件包括 baseUrl 和 标题 等。</p></li>
+
+<li><p>content</p>
+
+<p>这个目录用来存放网站的文章内容。</p></li>
+
+<li><p>data</p>
+
+<p>可配置的文件，用于 使用 hugo 来生成你的网站</p></li>
+
+<li><p>layouts</p>
+
+<p>自定义布局</p></li>
+
+<li><p>static</p>
+
+<p>静态资源，包括css img js 等文件。</p></li>
+
+<li><p>themes</p>
+
+<p>主题提供了布局和模板来渲染你的文章内容，你可以在网上下载不同的主题。</p></li>
+</ul>
+
+<ol>
+<li><strong>添加内容</strong></li>
+</ol>
+
+<p><code>hugo new post/welcome.md</code>
+会在 content/post 目录下生成一个  welcome.md 文件，文件内容如下：</p>
+
+<pre><code>+++
+date = &quot;2016-02-14T16:11:58+05:30&quot;
+draft = true
+title = &quot;welcome&quot;
+
++++
+</code></pre>
+
+<p>+++内为文章的 toml 配置，这些配置称为 front matter,它允许你文章配置，每个文章默认会有三个配置</p>
+
+<ul>
+<li>data 指定了文章创建的时间日期</li>
+<li>draft 指明改文章只是草稿，不会再生成步骤发布</li>
+<li>title 文章的标题</li>
+</ul>
+
+<p>让我们添加个 helloword到文章中。</p>
+
+<pre><code>+++
+date = &quot;2016-02-14T16:11:58+05:30&quot;
+draft = true
+title = &quot;welcome&quot;
+
++++
+
+Hello world!!
+</code></pre>
+
+<ol>
+<li><strong>本地运行</strong></li>
+</ol>
+
+<p>hugo 内置了一个server ，用来预览你的网站</p>
+
+<p><code>hugo server</code></p>
+
+<p>你可以在浏览器中访问   <a href="http://localhost:1313/">http://localhost:1313/</a>   ，但是你会发现你什么都看不到，有如下2个原因。</p>
+
+<ul>
+<li>虽然你看到了 hugo server 的输出，但是hugo 并没有渲染 草稿内容，除非你传递 &ndash;buildDrafts 参数给hugo server。</li>
+<li>没有指定MarkDown格式该用什么主题来渲染</li>
+</ul>
+
+<p><code>$ hugo server --buildDrafts</code> 来重新运行，这时候你还是什么都看不到，哈哈。</p>
+
+<ol>
+<li><strong>使用主题</strong></li>
+</ol>
+
+<p>主题提供了 布局 和模板来渲染你的文章内容，这里  <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a>  有很多的主题供你选择</p>
+
+<p>让我们来看下如何添加一个主题</p>
+
+<pre><code>cd themes
+git clone https://github.com/dim0627/hugo_theme_robust.git
+cd ..
+</code></pre>
+
+<p>运行server</p>
+
+<p><code>hugo server --theme=hugo_theme_robust --buildDrafts</code></p>
+
+<p>访问url ，这时候你才能看到你文章的内容喽。</p>
+
+<ol>
+<li><strong>生成发布</strong></li>
+</ol>
+
+<p>首先修改 config.toml 中的 baseURL
+ baseURL = &ldquo;https://<your GitHubusername>.github.io/mysite/&rdquo;</p>
+
+<p>运行  hugo &ndash;theme=hugo_theme_robust 会在当前目录下生成 public 文件夹，里面包含是生成的 网站。</p>
+
+<pre><code>tarted building sites ...
+Built site for language en:
+0 draft content
+0 future content
+0 expired content
+1 pages created
+0 non-page files copied
+2 paginator pages created
+0 categories created
+0 tags created
+total in 44 ms
+</code></pre>
+
+<p>在public中初始化git库，推送到你github的远程仓库</p>
+
+<pre><code>$ cd public
+$ git init
+$ git remote add origin git@github.com:&lt;github-username&gt;/&lt;github-username&gt;.github.io.git
+</code></pre>
 
     </div>
   </div>

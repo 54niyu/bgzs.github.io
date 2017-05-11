@@ -17,41 +17,181 @@
       <pubDate>Thu, 13 Oct 2016 22:50:01 +0800</pubDate>
       <author>54niyu@sina.com (Bing)</author>
       <guid>http://54niyu.github.io/post/welcome/</guid>
-      <description>
+      <description>&lt;p&gt;最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.&lt;/p&gt;
 
-&lt;h1 id=&#34;hello-world&#34;&gt;Hello World&lt;/h1&gt;
+&lt;p&gt;下面就是自己折腾的这个新鲜的工具了。&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;pre&gt;&lt;code&gt;哈哈哈哈哈哈哈哈好😁😆
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;安装&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
 
-最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合  
-来生成静态页面.
-
-下面就是自己折腾的这个新鲜的工具了。  
-
-第一步要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://github.com/spf13/hugo/releases&#34;&gt;Hugo&lt;/a&gt;&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;对于linux/unix系统，可以将它放置到/usr/loca/bin 以方便直接在terminal中敲命令
+&lt;p&gt;对于linux/unix系统，可以将它放置到/usr/loca/bin 以方便直接在terminal中敲命令&lt;/p&gt;
 
-如果是macOs系统并且安装了Homebrew，只需要运行：
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果是macOs系统并且安装了Homebrew，只需要运行:&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;brew update &amp;amp;&amp;amp; brew install hua&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;brew update &amp;amp;&amp;amp; brew install hugo&lt;/code&gt;&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;当然，如果你熟悉golang的话，也可以选择下载源码安装
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;当然，如果你熟悉golang的话，也可以选择下载源码安装&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;go get -v github.com/spf13/hugo&lt;/code&gt;&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;p&gt;你可以在终端输入 &lt;code&gt;hugo version&lt;/code&gt; 来测试安装结果&lt;/p&gt;
 
-&lt;p&gt;我是快乐的分割线&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Hugo Static Site Generator v0.17 BuildDate: 2016-10-07T22:42:05+08:00&lt;/code&gt;&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;搭建Site架构&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;code&gt;hugo new site mysite&lt;/code&gt; 会在当前目录下创建一个 mysite目录，里面包含了hugo生成的必要文件和文件夹&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;cd mysite &amp;amp;&amp;amp; tree -a&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.
+|-- archetypes
+|-- config.toml
+|-- content
+|-- data
+|-- layouts
+|-- static
+|-- themes
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;archetypes&lt;/p&gt;
+
+&lt;p&gt;你可以使用 hugo new 命令创建一个文章内容，每个文章内容包括一些配置在文件的首部 ，archetypes允许为你生成的文章定义自己的配置属性（包括 日志 题目。。）&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;config.tomal&lt;/p&gt;
+
+&lt;p&gt;网站的配置文件,默认的配置文件使用的是 TOML 格式，你也可以使用 YAML 或者 JSON。配置文件包括 baseUrl 和 标题 等。&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;content&lt;/p&gt;
+
+&lt;p&gt;这个目录用来存放网站的文章内容。&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;data&lt;/p&gt;
+
+&lt;p&gt;可配置的文件，用于 使用 hugo 来生成你的网站&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;layouts&lt;/p&gt;
+
+&lt;p&gt;自定义布局&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;static&lt;/p&gt;
+
+&lt;p&gt;静态资源，包括css img js 等文件。&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;themes&lt;/p&gt;
+
+&lt;p&gt;主题提供了布局和模板来渲染你的文章内容，你可以在网上下载不同的主题。&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;添加内容&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;code&gt;hugo new post/welcome.md&lt;/code&gt;
+会在 content/post 目录下生成一个  welcome.md 文件，文件内容如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+++
+date = &amp;quot;2016-02-14T16:11:58+05:30&amp;quot;
+draft = true
+title = &amp;quot;welcome&amp;quot;
+
++++
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;+++内为文章的 toml 配置，这些配置称为 front matter,它允许你文章配置，每个文章默认会有三个配置&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;data 指定了文章创建的时间日期&lt;/li&gt;
+&lt;li&gt;draft 指明改文章只是草稿，不会再生成步骤发布&lt;/li&gt;
+&lt;li&gt;title 文章的标题&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;让我们添加个 helloword到文章中。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;+++
+date = &amp;quot;2016-02-14T16:11:58+05:30&amp;quot;
+draft = true
+title = &amp;quot;welcome&amp;quot;
+
++++
+
+Hello world!!
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;本地运行&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;hugo 内置了一个server ，用来预览你的网站&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;hugo server&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;你可以在浏览器中访问   &lt;a href=&#34;http://localhost:1313/&#34;&gt;http://localhost:1313/&lt;/a&gt;   ，但是你会发现你什么都看不到，有如下2个原因。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;虽然你看到了 hugo server 的输出，但是hugo 并没有渲染 草稿内容，除非你传递 &amp;ndash;buildDrafts 参数给hugo server。&lt;/li&gt;
+&lt;li&gt;没有指定MarkDown格式该用什么主题来渲染&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code&gt;$ hugo server --buildDrafts&lt;/code&gt; 来重新运行，这时候你还是什么都看不到，哈哈。&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;使用主题&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;主题提供了 布局 和模板来渲染你的文章内容，这里  &lt;a href=&#34;https://themes.gohugo.io/&#34;&gt;https://themes.gohugo.io/&lt;/a&gt;  有很多的主题供你选择&lt;/p&gt;
+
+&lt;p&gt;让我们来看下如何添加一个主题&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd themes
+git clone https://github.com/dim0627/hugo_theme_robust.git
+cd ..
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;运行server&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;hugo server --theme=hugo_theme_robust --buildDrafts&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;访问url ，这时候你才能看到你文章的内容喽。&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;生成发布&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;首先修改 config.toml 中的 baseURL
+ baseURL = &amp;ldquo;https://&lt;your GitHubusername&gt;.github.io/mysite/&amp;rdquo;&lt;/p&gt;
+
+&lt;p&gt;运行  hugo &amp;ndash;theme=hugo_theme_robust 会在当前目录下生成 public 文件夹，里面包含是生成的 网站。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;tarted building sites ...
+Built site for language en:
+0 draft content
+0 future content
+0 expired content
+1 pages created
+0 non-page files copied
+2 paginator pages created
+0 categories created
+0 tags created
+total in 44 ms
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在public中初始化git库，推送到你github的远程仓库&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ cd public
+$ git init
+$ git remote add origin git@github.com:&amp;lt;github-username&amp;gt;/&amp;lt;github-username&amp;gt;.github.io.git
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
