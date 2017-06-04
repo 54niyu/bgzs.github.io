@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
-  <url>
-    <loc>http://54niyu.github.io/</loc>
-    <lastmod>2016-10-13T22:50:01+08:00</lastmod>
-  </url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
     <loc>http://54niyu.github.io/post/welcome/</loc>
     <lastmod>2016-10-13T22:50:01+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://54niyu.github.io/</loc>
+    <lastmod>2016-10-13T22:50:01+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://54niyu.github.io/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://54niyu.github.io/post/</loc>
+    <lastmod>2016-10-13T22:50:01+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://54niyu.github.io/tags/</loc>
+    <priority>0</priority>
   </url>
   
 </urlset>
