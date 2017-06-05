@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
   <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,6 +9,9 @@
   <meta property="og:title" content="Bing&#39;s Thinking" />
   <meta name="twitter:title" content="Bing&#39;s Thinking" />
   <meta name="author" content="Bing"/>
+  <link href='http://54niyu.github.io/img/favicon.ico' rel='icon' type='image/x-icon'/>
+  <meta property="og:image" content="http://54niyu.github.io/img/avatar-icon.png" />
+  <meta name="twitter:image" content="http://54niyu.github.io/img/avatar-icon.png" />
   <meta name="twitter:card" content="summary" />
   <meta property="og:url" content="http://54niyu.github.io/" />
   <meta property="og:type" content="website" />
@@ -33,7 +36,7 @@
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
-        <span class="sr-only">Toggle navigation</span>
+        <span class="sr-only">切换导航</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -44,6 +47,31 @@
     <div class="collapse navbar-collapse" id="main-navbar">
       <ul class="nav navbar-nav navbar-right">
         
+          
+            <li>
+              <a title="Blog" href="/">Blog</a>
+            </li>
+          
+        
+          
+            <li class="navlinks-container">
+              <a class="navlinks-parent" href="javascript:void(0)">Samples</a>
+              <div class="navlinks-children">
+                
+                  <a href="/tutorial/">Hugo</a>
+                
+                  <a href="/post/">Golang</a>
+                
+              </div>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/page/about/">About</a>
+            </li>
+          
+        
 
         
 
@@ -53,6 +81,10 @@
 
     <div class="avatar-container">
       <div class="avatar-img-border">
+        
+          <a title="Bing&#39;s Thinking" href="http://54niyu.github.io/">
+            <img class="avatar-img" src="http://54niyu.github.io/img/avatar-icon.png" alt="Bing&#39;s Thinking" />
+          </a>
         
       </div>
     </div>
@@ -83,6 +115,11 @@
             <div class="page-heading">
               <h1>Bing&#39;s Thinking</h1>
                 
+                  
+                    <hr class="small">
+                    <span class="page-subheading">Build a beautiful and simple website in minutes</span>
+                  
+                
                 
             </div>
           </div>
@@ -102,35 +139,54 @@
           
           
             <article class="post-preview">
-              <a href="http://54niyu.github.io/post/welcome/">
-                <h2 class="post-title">使用Hugo搭建github静态博客</h2>
+              <a href="http://54niyu.github.io/post/second/">
+                <h2 class="post-title">second</h2>
                 
               </a>
 
               <span class="post-meta">
-  Posted on October 13, 2016
+  发表于 June 5, 2017
   
 </span>
 
 
               <div class="post-entry">
                 
-                  最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.
-下面就是自己折腾的这个新鲜的工具了。
-安装 要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可
-Hugo
-对于linux/unix系统，可以将它放置到/usr/local/bin 以方便直接在terminal中敲命令
-如果是macOs系统并且安装了Homebrew，只需要运行:
-brew update &amp;&amp; brew install hugo
-当然，如果你熟悉golang的话，也可以选择下载源码安装
-go get -v github.com/spf13/hugo
-你可以在终端输入 hugo version 来测试安装结果
-Hugo Static Site Generator v0.17 BuildDate: 2016-10-07T22:42:05+08:00
-搭建Site架构 hugo new site mysite 会在当前目录下创建一个 mysite目录，里面包含了hugo生成的必要文件和文件夹
-cd mysite &amp;&amp; tree -a
-. |-- archetypes |-- config.toml |-- content |-- data |-- layouts |-- static |-- themes   archetypes
-你可以使用 hugo new 命令创建一个文章内容。当你使用命令时，会在文章的头部添加一些配置属性（日期，标题等），archetypes允许为你定义自己的配置属性，当运行 hugo new 时候会添加到文章的 front matter
-                  <a href="http://54niyu.github.io/post/welcome/" class="post-read-more">[Read More]</a>
+                  
+
+<h3 id="hello-world">hello world</h3>
+
+                
+              </div>
+
+              
+                <span class="post-meta">
+                
+                  #<a href="/tags/program">program</a>&nbsp;
+                
+                </span>
+              
+            </article>
+          
+            <article class="post-preview">
+              <a href="http://54niyu.github.io/post/welcome/">
+                <h2 class="post-title">使用Hugo搭建github静态博客</h2>
+                
+              </a>
+
+              <span class="post-meta">
+  发表于 October 13, 2016
+  
+</span>
+
+
+              <div class="post-entry">
+                
+                  <p>最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.</p>
+
+<p>下面就是自己折腾的这个新鲜的工具了。<br />
+</p>
+                  <a href="http://54niyu.github.io/post/welcome/" class="post-read-more">[阅读全文]</a>
                 
               </div>
 
@@ -159,11 +215,20 @@ cd mysite &amp;&amp; tree -a
                 </a>
               </li>
           
+          <li>
+            <a href="http://54niyu.github.io/index.xml" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
         </ul>
         <p class="credits copyright text-muted">
           Bing
           &nbsp;&bull;&nbsp;
-          2016
+          2017
 
           
             &nbsp;&bull;&nbsp;
@@ -172,7 +237,7 @@ cd mysite &amp;&amp; tree -a
         </p>
         
         <p class="credits theme-by text-muted">
-          <a href="http://gohugo.io">Hugo v0.21</a> powered &nbsp;&bull;&nbsp; Theme by <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a> adapted to <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a>
+          由 <a href="http://gohugo.io">Hugo v0.21</a> 强力驱动 &nbsp;&bull;&nbsp; 主题 <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> 移植自 <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
           
         </p>
       </div>
