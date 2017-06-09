@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>使用Hugo搭建github静态博客</title>
+  <meta property="og:title" content="使用Hugo搭建github静态博客" />
+  <meta name="twitter:title" content="使用Hugo搭建github静态博客" />
+  <meta name="description" content="最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.
+
+下面就是自己折腾的这个新鲜的工具了。
+">
+  <meta property="og:description" content="最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.
+
+下面就是自己折腾的这个新鲜的工具了。
+">
+  <meta name="twitter:description" content="最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.
+
+下面就是自己折腾的这个新鲜的工具了。
+">
+  <meta name="author" content="Bing"/>
+  <link href='http://54niyu.github.io/img/favicon.ico' rel='icon' type='image/x-icon'/>
+  <meta property="og:image" content="http://54niyu.github.io/img/avatar-icon.png" />
+  <meta name="twitter:image" content="http://54niyu.github.io/img/avatar-icon.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:url" content="http://54niyu.github.io/post/hugo_tutorial/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bing&#39;s Thinking" />
+
+  <meta name="generator" content="Hugo 0.21" />
+  <link rel="canonical" href="http://54niyu.github.io/post/hugo_tutorial/" />
+  <link rel="alternate" href="http://54niyu.github.io/index.xml" type="application/rss+xml" title="Bing&#39;s Thinking">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="http://54niyu.github.io/css/main.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+  <link rel="stylesheet" href="http://54niyu.github.io/css/pygment_highlights.css" />
+  <link rel="stylesheet" href="http://54niyu.github.io/css/highlight.min.css" />
+
+</head>
+
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">切换导航</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://54niyu.github.io/">Bing&#39;s Thinking</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/">Blog</a>
+            </li>
+          
+        
+          
+            <li class="navlinks-container">
+              <a class="navlinks-parent" href="javascript:void(0)">Samples</a>
+              <div class="navlinks-children">
+                
+                  <a href="/tutorial/">Hugo</a>
+                
+                  <a href="/post/">Golang</a>
+                
+              </div>
+            </li>
+          
+        
+          
+            <li>
+              <a title="TAGS" href="/tags/">TAGS</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/page/about">About</a>
+            </li>
+          
+        
+
+        
+
+        
+      </ul>
+    </div>
+
+    <div class="avatar-container">
+      <div class="avatar-img-border">
+        
+          <a title="Bing&#39;s Thinking" href="http://54niyu.github.io/">
+            <img class="avatar-img" src="http://54niyu.github.io/img/avatar-icon.png" alt="Bing&#39;s Thinking" />
+          </a>
+        
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+
+
+    
+  
+  
+  
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="post-heading">
+              <h1>使用Hugo搭建github静态博客</h1>
+                
+                
+                  <span class="post-meta">
+  发表于 June 9, 2017
+  
+</span>
+
+
+                
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.</p>
+
+<p>下面就是自己折腾的这个新鲜的工具了。<br />
+</p>
+
+<hr />
+
+<h2 id="安装">安装</h2>
+
+<p>要安装hugo，得益于golang的编译方式，hugo的安装很简单，只需要去官网下载对应平台的二进制文件即可</p>
+
+<p><a href="https://github.com/spf13/hugo/releases">Hugo</a></p>
+
+<p>对于linux/unix系统，可以将它放置到/usr/local/bin 以方便直接在terminal中敲命令</p>
+
+<p>如果是macOs系统并且安装了Homebrew，只需要运行:</p>
+
+<p><code>brew update &amp;&amp; brew install hugo</code></p>
+
+<p>当然，如果你熟悉golang的话，也可以选择下载源码安装</p>
+
+<p><code>go get -v github.com/spf13/hugo</code></p>
+
+<p>你可以在终端输入 <code>hugo version</code> 来测试安装结果</p>
+
+<p><code>Hugo Static Site Generator v0.17 BuildDate: 2016-10-07T22:42:05+08:00</code></p>
+
+<h2 id="搭建site架构">搭建Site架构</h2>
+
+<p><code>hugo new site mysite</code> 会在当前目录下创建一个 mysite目录，里面包含了hugo生成的必要文件和文件夹</p>
+
+<p><code>cd mysite &amp;&amp; tree -a</code></p>
+
+<pre><code>.
+|-- archetypes
+|-- config.toml
+|-- content
+|-- data
+|-- layouts
+|-- static
+|-- themes
+</code></pre>
+
+<ul>
+<li><p>archetypes</p>
+
+<p>你可以使用 hugo new 命令创建一个文章内容。当你使用命令时，会在文章的头部添加一些配置属性（日期，标题等），archetypes允许为你定义自己的配置属性，当运行 hugo new 时候会添加到文章的  front matter</p></li>
+
+<li><p>config.tomal</p>
+
+<p>每个网站都会有个配置文件，默认，配置文件回事 toml 格式，你也可以使用json 或者 yaml 。config.tomal中的配置会被应用到全站。配置文件包括 baseUrl 和 标题 等。</p></li>
+
+<li><p>content</p>
+
+<p>这个目录用来存放网站的文章内容, 你可以在 context目录下为不同的章节（section）添加不同的子目录。假设你的网站有三个不同的章节 blog，article，tutorial，你要在context目录下以section的名字创建三个不同的子目录。section的名字会被hugo用来适配不同的布局（layout）</p></li>
+
+<li><p>data</p>
+
+<p>可配置的文件，用于 使用 hugo 来生成你的网站</p></li>
+
+<li><p>layouts</p>
+
+<p>自定义布局,目录下的文件用来指定你的内容是如何转变成静态页面的</p></li>
+
+<li><p>static</p>
+
+<p>静态资源，包括css img js 等文件。</p></li>
+
+<li><p>themes</p>
+
+<p>主题提供了布局和模板来渲染你的文章内容，你可以在网上下载不同的主题。</p></li>
+</ul>
+
+<h2 id="添加内容">添加内容</h2>
+
+<p>确保你再 mysit目录下 运行   <code>hugo new post/welcome.md</code>
+会在 content下 目录下生成一个新的目录 post  和 welcome.md 文件，文件内容如下：</p>
+
+<pre><code>+++
+date = &quot;2016-02-14T16:11:58+05:30&quot;
+draft = true
+title = &quot;welcome&quot;
+
++++
+</code></pre>
+
+<p>+++内为文章的 toml 配置，这些配置称为 front matter,它允许你文章配置，每个文章默认会有三个配置</p>
+
+<ul>
+<li>data 指定了文章创建的时间日期</li>
+<li>draft 指明改文章只是草稿，不会在生成步骤发布</li>
+<li>title 文章的标题</li>
+</ul>
+
+<p>让我们添加个 helloword到文章中。</p>
+
+<pre><code>+++
+date = &quot;2016-02-14T16:11:58+05:30&quot;
+draft = true
+title = &quot;welcome&quot;
+
++++
+
+Hello world!!
+</code></pre>
+
+<h2 id="本地运行">本地运行</h2>
+
+<p>hugo 内置了一个server ，用来预览你的网站，你也可以在生成环境中使用该server，在 mysite目录下运行</p>
+
+<p><code>hugo server</code></p>
+
+<pre><code>0 of 1 draft rendered
+0 future content
+0 pages created
+0 paginator pages created
+0 tags created
+0 categories created
+in 9 ms
+total in 6 ms
+Watching for changes in /Users/Bing/Code/mysite/{data,content,layouts,static}
+Serving pages from memory
+Web Server is available at http://localhost:1313/ (bind address 127.0.0.1)
+Press Ctrl+C to stop
+</code></pre>
+
+<p>你可以在浏览器中访问   <a href="http://localhost:1313/">http://localhost:1313/</a>   ，但是你会发现你什么都看不到，有如下2个原因。</p>
+
+<ul>
+<li>虽然你看到了 hugo server 的输出，但是hugo 并没有渲染 草稿内容，除非你传递 &ndash;buildDrafts 参数给hugo server。</li>
+<li>没有指定MarkDown格式该用什么主题来渲染</li>
+</ul>
+
+<p><code>$ hugo server --buildDrafts</code> 来重新运行，这时候你还是什么都看不到因为你没有指定主题，哈哈。</p>
+
+<h2 id="使用主题">使用主题</h2>
+
+<p>主题提供了布局和模板来渲染你的文章内容，这里  <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a>  有很多的主题供你选择</p>
+
+<p>让我们来看下如何添加一个主题</p>
+
+<pre><code>cd themes
+git clone https://github.com/dim0627/hugo_theme_robust.git
+cd ..
+</code></pre>
+
+<p>运行server</p>
+
+<p><code>hugo server --theme=hugo_theme_robust --buildDrafts</code></p>
+
+<p>访问url ，这时候你才能看到你文章的内容喽。</p>
+
+<p>让我们来进一步了解一下主题的布局，一个主题包含如下内容：</p>
+
+<ul>
+<li>theme.toml 是主题的配置文件，比如名字，描述，作者，许可证。</li>
+<li>images 文件夹包含两个图片，screenshot.png和 tn.png 。screenshot.png是列表视图的图片，tn.png是单页面视图的图片</li>
+<li>layouts 文件夹包括不同内容类型（context type）的不同视图（view），每个内容类型有两个文件 single.html 和 list.hmtl。single.html 用用来渲染单个内容。list.html用来显示一系列的内容项。例如你用list.html来显示所有有programing标签的文章</li>
+<li>static 文件夹存放着模板使用的静态组件，静态组件可以是JavaScript 库例jQuery或者CSS样式或者图片，或者任何其他静态内容，这个文件会在渲染的时候拷贝到最终的网站</li>
+</ul>
+
+<h2 id="使用多个主题">使用多个主题</h2>
+
+<p>你可以通过切换不同的主题来轻易的测试不同的布局，假设我们想使用 bleak 主题，clone bleak主题到 themes 目录下</p>
+
+<p><code>$ git clone https://github.com/Zenithar/hugo-theme-bleak.git</code></p>
+
+<p>使用hugo-theme-bleak主题重启服务</p>
+
+<p><code>$ hugo server --theme=hugo-theme-bleak --buildDrafts</code></p>
+
+<h2 id="发布内容">发布内容</h2>
+
+<p>至今为止我们写的内容都是在草稿状态，要让一个草稿公开，你可以运行命令或者手动改变内容的草稿状态为 false</p>
+
+<p><code>$ hugo undraft content/post/welcome.md</code></p>
+
+<p>这时候你可以不使用 buildDrafts参数来运行 server</p>
+
+<p><code>$ hugo server --theme=hugo_theme_robust</code></p>
+
+<h2 id="整合disqus">整合Disqus</h2>
+
+<p>Disqus允许你整合评论功能，启用 Disqus，你需要在 config.toml中设置 disqusShortname</p>
+
+<pre><code>[Params]
+  Author = &quot;Shekhar Gulati&quot;
+  disqusShortname = &lt;your disqus shortname&gt;
+</code></pre>
+
+<h2 id="生成发布">生成发布</h2>
+
+<p>首先修改 config.toml 中的 baseURL
+ baseURL = &ldquo;https://<your GitHubusername>.github.io/mysite/&rdquo;</p>
+
+<p>运行  hugo &ndash;theme=hugo_theme_robust 会在当前目录下生成 public 文件夹，里面包含是生成的网站。</p>
+
+<pre><code>tarted building sites ...
+Built site for language en:
+0 draft content
+0 future content
+0 expired content
+1 pages created
+0 non-page files copied
+2 paginator pages created
+0 categories created
+0 tags created
+total in 44 ms
+</code></pre>
+
+<p>这时候你就可以把public中生成的网站内容发布到任何你想发布的地方，例如github提供的免费的静态页面空间。</p>
+
+<p>在public中初始化git库，推送到你github的远程仓库</p>
+
+<pre><code>$ cd public
+$ git init
+$ git remote add origin git@github.com:&lt;github-username&gt;/&lt;github-username&gt;.github.io.git
+$ git push origin master
+
+</code></pre>
+
+<p>访问你的 yourgithubname.github.io 就可以看到网站了。</p>
+
+<hr />
+
+<blockquote>
+<p>这篇是hugo官方quickstart的简单翻译</p>
+</blockquote>
+      </article>
+
+      <ul class="pager blog-pager">
+        
+          <li class="previous">
+            <a href="http://54niyu.github.io/post/echo_middleware/" data-toggle="tooltip" data-placement="top" title="echo框架的中间件的内部实现">&larr; 前一篇</a>
+          </li>
+        
+        
+      </ul>
+
+      
+        
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'BingBing';
+    var disqus_identifier = 'http:\/\/54niyu.github.io\/post\/hugo_tutorial\/';
+    var disqus_title = '使用Hugo搭建github静态博客';
+    var disqus_url = 'http:\/\/54niyu.github.io\/post\/hugo_tutorial\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+        
+      
+
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="mailto:54niyu@sina.com" title="Email me">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="http://54niyu.github.io/index.xml" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          Bing
+          &nbsp;&bull;&nbsp;
+          2017
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="http://54niyu.github.io/">Bing&#39;s Thinking</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          由 <a href="http://gohugo.io">Hugo v0.21</a> 强力驱动 &nbsp;&bull;&nbsp; 主题 <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> 移植自 <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js" integrity="sha384-dq1/gEHSxPZQ7DdrM82ID4YVol9BYyU7GbWlIwnwyPzotpoc57wDw/guX8EaYGPx" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="http://54niyu.github.io/js/main.js"></script>
+<script src="http://54niyu.github.io/js/highlight.min.js"></script>
+<script> hljs.initHighlightingOnLoad(); </script>
+<script> renderMathInElement(document.body); </script>
+
+
+
+
+
+  </body>
+</html>
+

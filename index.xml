@@ -7,10 +7,22 @@
     <generator>Hugo -- gohugo.io</generator>
     <managingEditor>54niyu@sina.com (Bing)</managingEditor>
     <webMaster>54niyu@sina.com (Bing)</webMaster>
-    <lastBuildDate>Fri, 09 Jun 2017 23:04:42 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 09 Jun 2017 23:06:39 +0800</lastBuildDate>
     
 	<atom:link href="http://54niyu.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>使用Hugo搭建github静态博客</title>
+      <link>http://54niyu.github.io/post/hugo_tutorial/</link>
+      <pubDate>Fri, 09 Jun 2017 23:06:39 +0800</pubDate>
+      <author>54niyu@sina.com (Bing)</author>
+      <guid>http://54niyu.github.io/post/hugo_tutorial/</guid>
+      <description>&lt;p&gt;最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.&lt;/p&gt;
+
+&lt;p&gt;下面就是自己折腾的这个新鲜的工具了。&lt;br /&gt;
+&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>echo框架的中间件的内部实现</title>

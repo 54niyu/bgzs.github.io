@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <managingEditor>54niyu@sina.com (Bing)</managingEditor>
     <webMaster>54niyu@sina.com (Bing)</webMaster>
-    <lastBuildDate>Fri, 09 Jun 2017 23:04:42 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 09 Jun 2017 23:06:39 +0800</lastBuildDate>
     
 	<atom:link href="http://54niyu.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,9 +15,18 @@
     <item>
       <title>Golang</title>
       <link>http://54niyu.github.io/tags/golang/</link>
-      <pubDate>Fri, 09 Jun 2017 23:04:42 +0800</pubDate>
+      <pubDate>Fri, 09 Jun 2017 23:06:39 +0800</pubDate>
       <author>54niyu@sina.com (Bing)</author>
       <guid>http://54niyu.github.io/tags/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hugo</title>
+      <link>http://54niyu.github.io/tags/hugo/</link>
+      <pubDate>Fri, 09 Jun 2017 23:06:39 +0800</pubDate>
+      <author>54niyu@sina.com (Bing)</author>
+      <guid>http://54niyu.github.io/tags/hugo/</guid>
       <description></description>
     </item>
     
