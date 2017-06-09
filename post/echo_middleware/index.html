@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>echo框架的中间件的内部实现</title>
+  <meta property="og:title" content="echo框架的中间件的内部实现" />
+  <meta name="twitter:title" content="echo框架的中间件的内部实现" />
+  <meta name="description" content="由于公司的某些地方用到了echo，在使用echo中间件过程了，遇到了一个bug，只得去看echo的源码，发现echo的源码很简洁，中间件实现的思想也挺有意思的。
+
+">
+  <meta property="og:description" content="由于公司的某些地方用到了echo，在使用echo中间件过程了，遇到了一个bug，只得去看echo的源码，发现echo的源码很简洁，中间件实现的思想也挺有意思的。
+
+">
+  <meta name="twitter:description" content="由于公司的某些地方用到了echo，在使用echo中间件过程了，遇到了一个bug，只得去看echo的源码，发现echo的源码很简洁，中间件实现的思想也挺有意思的。
+
+">
+  <meta name="author" content="Bing"/>
+  <link href='http://54niyu.github.io/img/favicon.ico' rel='icon' type='image/x-icon'/>
+  <meta property="og:image" content="http://54niyu.github.io/img/avatar-icon.png" />
+  <meta name="twitter:image" content="http://54niyu.github.io/img/avatar-icon.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:url" content="http://54niyu.github.io/post/echo_middleware/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bing&#39;s Thinking" />
+
+  <meta name="generator" content="Hugo 0.21" />
+  <link rel="canonical" href="http://54niyu.github.io/post/echo_middleware/" />
+  <link rel="alternate" href="http://54niyu.github.io/index.xml" type="application/rss+xml" title="Bing&#39;s Thinking">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="http://54niyu.github.io/css/main.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+  <link rel="stylesheet" href="http://54niyu.github.io/css/pygment_highlights.css" />
+  <link rel="stylesheet" href="http://54niyu.github.io/css/highlight.min.css" />
+
+</head>
+
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">切换导航</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://54niyu.github.io/">Bing&#39;s Thinking</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/">Blog</a>
+            </li>
+          
+        
+          
+            <li class="navlinks-container">
+              <a class="navlinks-parent" href="javascript:void(0)">Samples</a>
+              <div class="navlinks-children">
+                
+                  <a href="/tutorial/">Hugo</a>
+                
+                  <a href="/post/">Golang</a>
+                
+              </div>
+            </li>
+          
+        
+          
+            <li>
+              <a title="TAGS" href="/tags/">TAGS</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/page/about">About</a>
+            </li>
+          
+        
+
+        
+
+        
+      </ul>
+    </div>
+
+    <div class="avatar-container">
+      <div class="avatar-img-border">
+        
+          <a title="Bing&#39;s Thinking" href="http://54niyu.github.io/">
+            <img class="avatar-img" src="http://54niyu.github.io/img/avatar-icon.png" alt="Bing&#39;s Thinking" />
+          </a>
+        
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+
+
+    
+  
+  
+  
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="post-heading">
+              <h1>echo框架的中间件的内部实现</h1>
+                
+                
+                  <span class="post-meta">
+  发表于 June 9, 2017
+  
+</span>
+
+
+                
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>由于公司的某些地方用到了echo，在使用echo中间件过程了，遇到了一个bug，只得去看echo的源码，发现echo的源码很简洁，中间件实现的思想也挺有意思的。</p>
+
+<p></p>
+
+<h3 id="echo-是什么">echo 是什么？</h3>
+
+<p>简易高效的 Go(Golang) 语言 HTTP 框架。比其他框架快速10倍。</p>
+
+<blockquote>
+<ul>
+<li>优化的 HTTP 路由。</li>
+<li>创建可靠并可伸缩的RESTful API。</li>
+<li>行于标准的HTTP服务器或FastHTTP服务器。</li>
+<li>组 APIs.</li>
+<li>可扩展的middleware框架。</li>
+<li>Define middleware at root, group or route level.</li>
+<li>为JSON, XML进行数据绑定，产生负荷。</li>
+<li>提供便捷的方法来发送各种HTTP相应。</li>
+<li>对HTTP错误进行集中处理。</li>
+<li>Template rendering with any template engine.</li>
+<li>定义属于你的日志格式。</li>
+<li>高度个性化。</li>
+</ul>
+</blockquote>
+
+<h3 id="中间件-middleware">中间件（middleware）</h3>
+
+<p>中间件是个函数，嵌入在HTTP的请求中间。有两种形式的中间件:</p>
+
+<p>Echo#Pre() 用于注册一个在路由执行之前运行的中间件，可以用来修改请求的一些属性。比如在请求路径结尾添加或者删除一个’/‘来使之能与路由匹配。</p>
+
+<p>Echo#Use() 在这个级别注册中间件。 这个级别的中间件运行在路由处理完请求之后，可以调用所有的 echo.Context API。</p>
+
+<h3 id="use">Use</h3>
+
+<p>让我们来看下Use的具体实现</p>
+
+<pre><code>Echo struct {
+    ...
+    middleware       []MiddlewareFunc
+    ...
+}
+// Use adds handler to the middleware chain.
+func (e *Echo) Use(m ...Middleware) {
+	for _, h := range m {
+		e.middleware = append(e.middleware, wrapMiddleware(h))
+	}
+}
+
+</code></pre>
+
+<p>e.middleware 定义在 Echo中, 是个 MiddlewareFunc的slice</p>
+
+<p>Use方法只是简单的向 middleware 这个slice中插入一个 middleware</p>
+
+<p>我们再来看下 MiddlewareFunc的定义</p>
+
+<pre><code>// MiddlewareFunc ...
+MiddlewareFunc func(HandlerFunc) HandlerFunc
+
+// HandlerFunc ...
+HandlerFunc func(*Context) error
+
+</code></pre>
+
+<p>MiddlewareFunc 是个函数，它接受一个 HandlerFunc 并返回一个 HandlerFunc</p>
+
+<pre><code>// ServeHTTP implements `http.Handler` interface, which serves HTTP requests.
+func (e *Echo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if e.hook != nil {
+		e.hook(w, r)
+	}
+
+	c := e.pool.Get().(*Context)
+	h, e := e.router.Find(r.Method, r.URL.Path, c)
+	c.reset(r, w, e)
+
+	// Chain middleware with handler in the end
+	for i := len(e.middleware) - 1; i &gt;= 0; i-- {
+		h = e.middleware[i](h)
+	}
+
+	// Execute chain
+	if err := h(c); err != nil {
+		e.httpErrorHandler(err, c)
+	}
+
+	e.pool.Put(c)
+}
+
+</code></pre>
+
+<p>可以看到echo处理请求的时候，先从 Context池中取出一个 Context，
+通过 URL去获取到对应注册的   HandlerFunc</p>
+
+<p>然后从后往前读取   middleware 将 handlerFunc 一层一层的包装，最后返回一个修饰过得
+handlerFunc</p>
+
+<p>比如说现在注册了4个middleware :  a , b ,c ,d  和你在路由中注册的处理函数   h</p>
+
+<p>最后获得的是 h :=  a(b(c(d(h))))</p>
+
+<p>有种装饰器的味道</p>
+
+<p>当你调用 h(Context)时候，进过如下的流程:</p>
+
+<pre><code>-&gt; a 
+    -&gt; b
+        -&gt; c
+            -&gt; d
+                -&gt; h
+            &lt;- d
+        &lt;- c
+    &lt;- b
+&lt;- a
+</code></pre>
+
+<p>下面附上一段代码</p>
+
+<pre><code>package main
+
+import (
+	&quot;fmt&quot;
+	&quot;net/http&quot;
+
+	&quot;github.com/labstack/echo&quot;
+)
+
+func MakeMiddleware(name string) echo.MiddlewareFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		fmt.Println(&quot;register in &quot;, name, &quot;..&quot;)
+		return func(ctx echo.Context) error {
+			fmt.Println(&quot;handle in &quot;, name, &quot;..&quot;)
+			defer fmt.Println(&quot;handle over in &quot;, name, &quot;..&quot;)
+			h(ctx)
+			return nil
+		}
+	}
+}
+
+func main() {
+	// Echo instance
+	e := echo.New()
+
+	e.Use(MakeMiddleware(&quot;a&quot;))
+	e.Use(MakeMiddleware(&quot;b&quot;))
+	e.Use(MakeMiddleware(&quot;c&quot;))
+	e.Use(MakeMiddleware(&quot;d&quot;))
+
+	// Route =&gt; handler
+	e.GET(&quot;/&quot;, func(c echo.Context) error {
+		return c.String(http.StatusOK, &quot;Hello, World!\n&quot;)
+	})
+
+	// Start server
+	e.Logger.Fatal(e.Start(&quot;:1323&quot;))
+}
+</code></pre>
+
+<p>程序运行的结果：</p>
+
+<pre><code>register in  d ..
+register in  c ..
+register in  b ..
+register in  a ..
+handle in  a ..
+handle in  b ..
+handle in  c ..
+handle in  d ..
+handle over in  d ..
+handle over in  c ..
+handle over in  b ..
+handle over in  a ..
+</code></pre>
+      </article>
+
+      <ul class="pager blog-pager">
+        
+        
+      </ul>
+
+      
+        
+          <div class="disqus-comments">
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'BingBing';
+    var disqus_identifier = 'http:\/\/54niyu.github.io\/post\/echo_middleware\/';
+    var disqus_title = 'echo框架的中间件的内部实现';
+    var disqus_url = 'http:\/\/54niyu.github.io\/post\/echo_middleware\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          </div>
+        
+      
+
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+                <a href="mailto:54niyu@sina.com" title="Email me">
+                  <span class="fa-stack fa-lg">
+                    <i class="fa fa-circle fa-stack-2x"></i>
+                    <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          <li>
+            <a href="http://54niyu.github.io/index.xml" title="RSS">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          Bing
+          &nbsp;&bull;&nbsp;
+          2017
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="http://54niyu.github.io/">Bing&#39;s Thinking</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          由 <a href="http://gohugo.io">Hugo v0.21</a> 强力驱动 &nbsp;&bull;&nbsp; 主题 <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> 移植自 <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js" integrity="sha384-dq1/gEHSxPZQ7DdrM82ID4YVol9BYyU7GbWlIwnwyPzotpoc57wDw/guX8EaYGPx" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="http://54niyu.github.io/js/main.js"></script>
+<script src="http://54niyu.github.io/js/highlight.min.js"></script>
+<script> hljs.initHighlightingOnLoad(); </script>
+<script> renderMathInElement(document.body); </script>
+
+
+
+
+
+  </body>
+</html>
+
