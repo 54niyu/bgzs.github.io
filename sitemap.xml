@@ -3,18 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://54niyu.github.io/post/second/</loc>
-    <lastmod>2017-06-05T10:21:06+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://54niyu.github.io/post/welcome/</loc>
-    <lastmod>2016-10-13T22:50:01+08:00</lastmod>
+    <loc>http://54niyu.github.io/post/echo_middleware/</loc>
+    <lastmod>2017-06-09T23:04:42+08:00</lastmod>
   </url>
   
   <url>
     <loc>http://54niyu.github.io/</loc>
-    <lastmod>2017-06-05T10:21:06+08:00</lastmod>
+    <lastmod>2017-06-09T23:04:42+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -24,20 +19,20 @@
   </url>
   
   <url>
-    <loc>http://54niyu.github.io/post/</loc>
-    <lastmod>2017-06-05T10:21:06+08:00</lastmod>
+    <loc>http://54niyu.github.io/tags/golang/</loc>
+    <lastmod>2017-06-09T23:04:42+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://54niyu.github.io/tags/program/</loc>
-    <lastmod>2017-06-05T10:21:06+08:00</lastmod>
+    <loc>http://54niyu.github.io/post/</loc>
+    <lastmod>2017-06-09T23:04:42+08:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://54niyu.github.io/tags/</loc>
-    <lastmod>2017-06-05T10:21:06+08:00</lastmod>
+    <lastmod>2017-06-09T23:04:42+08:00</lastmod>
     <priority>0</priority>
   </url>
   

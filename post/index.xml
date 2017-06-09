@@ -7,30 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <managingEditor>54niyu@sina.com (Bing)</managingEditor>
     <webMaster>54niyu@sina.com (Bing)</webMaster>
-    <lastBuildDate>Mon, 05 Jun 2017 10:21:06 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 09 Jun 2017 23:04:42 +0800</lastBuildDate>
     
 	<atom:link href="http://54niyu.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>second</title>
-      <link>http://54niyu.github.io/post/second/</link>
-      <pubDate>Mon, 05 Jun 2017 10:21:06 +0800</pubDate>
+      <title>echo框架的中间件的内部实现</title>
+      <link>http://54niyu.github.io/post/echo_middleware/</link>
+      <pubDate>Fri, 09 Jun 2017 23:04:42 +0800</pubDate>
       <author>54niyu@sina.com (Bing)</author>
-      <guid>http://54niyu.github.io/post/second/</guid>
-      <description> hello world </description>
-    </item>
-    
-    <item>
-      <title>使用Hugo搭建github静态博客</title>
-      <link>http://54niyu.github.io/post/welcome/</link>
-      <pubDate>Thu, 13 Oct 2016 22:50:01 +0800</pubDate>
-      <author>54niyu@sina.com (Bing)</author>
-      <guid>http://54niyu.github.io/post/welcome/</guid>
-      <description>&lt;p&gt;最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.&lt;/p&gt;
+      <guid>http://54niyu.github.io/post/echo_middleware/</guid>
+      <description>&lt;p&gt;由于公司的某些地方用到了echo，在使用echo中间件过程了，遇到了一个bug，只得去看echo的源码，发现echo的源码很简洁，中间件实现的思想也挺有意思的。&lt;/p&gt;
 
-&lt;p&gt;下面就是自己折腾的这个新鲜的工具了。&lt;br /&gt;
-&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>
