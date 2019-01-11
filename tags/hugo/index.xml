@@ -2,26 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hugo on Bing&#39;s Thinking</title>
-    <link>http://54niyu.github.io/tags/hugo/</link>
+    <link>https://54niyu.github.io/tags/hugo/</link>
     <description>Recent content in Hugo on Bing&#39;s Thinking</description>
     <generator>Hugo -- gohugo.io</generator>
-    <managingEditor>54niyu@sina.com (Bing)</managingEditor>
-    <webMaster>54niyu@sina.com (Bing)</webMaster>
-    <lastBuildDate>Fri, 09 Jun 2017 23:06:39 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 08 Jun 2017 23:06:39 +0800</lastBuildDate>
     
-	<atom:link href="http://54niyu.github.io/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://54niyu.github.io/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>使用Hugo搭建github静态博客</title>
-      <link>http://54niyu.github.io/post/hugo_tutorial/</link>
-      <pubDate>Fri, 09 Jun 2017 23:06:39 +0800</pubDate>
-      <author>54niyu@sina.com (Bing)</author>
-      <guid>http://54niyu.github.io/post/hugo_tutorial/</guid>
+      <link>https://54niyu.github.io/post/hugo_tutorial/</link>
+      <pubDate>Thu, 08 Jun 2017 23:06:39 +0800</pubDate>
+      
+      <guid>https://54niyu.github.io/post/hugo_tutorial/</guid>
       <description>&lt;p&gt;最近突然想写博客了，想起github免费提供的一个静态空间，就想着去利用一下。刷知乎上看到了用golang写的hugo很适合来生成静态页面.&lt;/p&gt;
 
-&lt;p&gt;下面就是自己折腾的这个新鲜的工具了。&lt;br /&gt;
-&lt;/p&gt;</description>
+&lt;p&gt;下面就是自己折腾的这个新鲜的工具了。&lt;/p&gt;</description>
     </item>
     
   </channel>

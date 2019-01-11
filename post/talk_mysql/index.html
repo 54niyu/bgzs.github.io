@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="author" content="Wang Bing">
+    <meta name="description" content="Bing&#39;s Thinking">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MySQL事务和锁笔记"/>
+<meta name="twitter:description" content="在ezbuy做支付的这一段时间，打交道最多的是第三方支付的API对接，还有就是用户钱包数据的管理,既然是涉及到钱，那么对事务的要求就比较高，不可避免的跟关系型数据库打交道，而用的最多的也是MySQL和innoDB 引擎，在工作中也会遇到一些关于数据库事务、锁之列的问题，所以也搜索了很多相关的知识，在这里做个备忘"/>
+
+
+    <base href="https://54niyu.github.io/post/talk_mysql/">
+    <title>
+  MySQL事务和锁笔记 · Bing&#39;s Thinking
+</title>
+
+    <link rel="canonical" href="https://54niyu.github.io/post/talk_mysql/">
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Merriweather:300,700|Source+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" integrity="sha256-oSrCnRYXvHG31SBifqP2PM1uje7SJUyX0nTwO2RJV54=" crossorigin="anonymous" />
+
+    
+      
+      
+      <link rel="stylesheet" href="https://54niyu.github.io/css/coder.min.a3307e096757a84995f145daccdad26307f88b657e9946d207d011e314ef1442.css" integrity="sha256-ozB&#43;CWdXqEmV8UXazNrSYwf4i2V&#43;mUbSB9AR4xTvFEI=" crossorigin="anonymous" media="screen" />
+    
+
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="https://54niyu.github.io/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://54niyu.github.io/images/favicon-16x16.png" sizes="16x16">
+
+    
+
+    <meta name="generator" content="Hugo 0.53" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://54niyu.github.io">
+      Bing&#39;s Thinking
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
+      
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/post/">Posts</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/tags/">TAGS</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/page/about">About</a>
+          </li>
+        
+      
+      
+    </ul>
+  </section>
+</nav>
+
+
+      <div class="content">
+        
+  <section class="container page">
+  <article>
+    <header>
+      <h1>MySQL事务和锁笔记</h1>
+    </header>
+
+    <p>在ezbuy做支付的这一段时间，打交道最多的是第三方支付的API对接，还有就是用户钱包数据的管理,既然是涉及到钱，那么对事务的要求就比较高，不可避免的跟关系型数据库打交道，而用的最多的也是MySQL和innoDB 引擎，在工作中也会遇到一些关于数据库事务、锁之列的问题，所以也搜索了很多相关的知识，在这里做个备忘</p>
+
+<h3 id="innodb">innoDB</h3>
+
+<p>innoDB 是一个通用存储引擎，在高可靠和高性能取得一个平衡，MySQL自5.7版本之后被作为默认的存储引擎。
+innoDB 的优势</p>
+
+<ul>
+<li>数据库操作语言（DML）遵循ACID，事务支持commit roolback和奔溃恢复能力去保护用户数据</li>
+<li>行级别的锁和 Orace-Style的一致性读操作提升多用户的并发和性能</li>
+<li>innoDB使用主键优化查询磁盘</li>
+<li>支持外键约束</li>
+</ul>
+
+<h3 id="acid">ACID</h3>
+
+<p>先引用wiki上的一段描述</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4">Atomicity（原子性）：一个事务（transaction）中的所有操作，或者全部完成，或者全部不完成，不会结束在中间某个环节。事务在执行过程中发生错误，会被恢复（Rollback）到事务开始前的状态，就像这个事务从来没有执行过一样。即，事务不可分割、不可约简。
+Consistency（一致性）：在事务开始之前和事务结束以后，数据库的完整性没有被破坏。这表示写入的资料必须完全符合所有的预设约束、触发器、级联回滚等。
+Isolation（隔离性）：数据库允许多个并发事务同时对其数据进行读写和修改的能力，隔离性可以防止多个事务并发执行时由于交叉执行而导致数据的不一致。
+Durability（持久性）：事务处理结束后，对数据的修改就是永久的，即便系统故障也不会丢失。</pre></div>
+<p>谈一下我个人对这4个特性的理解：
+我们使用事务的一个主要原因是保证一个事务内的所有操作，要么全部成功，要么全部失败，也就是 Atomicity的表现。而在事务提交或回滚之后，数据库处于一个一致的状态 Consistency ，要么是包含已经提交事务修改后的数据库，或者是因为事务回滚返回到事务执行之前的数据库，不会出现其他状态。而Durability则意味着事务提交的更改是永久的，由于数据库可能因为异常而奔溃，也需要保证提交的事务一定会被持久化到文件中。而隔离性更多的是描述不同事务之间对事务内未提交或者已经提交修改的可见程序，不同的隔离级别会有脏读，不可重复读，幻读之类的问题，也会影响到事务的原子性，较低的隔离级别可能会造成事务的联机回滚或者不可回滚。</p>
+
+<h3 id="事务的原子性-持久性">事务的原子性，持久性</h3>
+
+<p>在很多系统中，尤其是在数据库或者是分布式系统中，我们会发现日志很重要，MySQL的很多特性都是要借助于日志来实现。
+在innoDB中，有两种重要的日志，下面是一段官方文档描述。</p>
+
+<ul>
+<li><p>undo log<br />
+回滚日志是跟一个事务相关的回滚日志记录（record)的集合。一条回滚日志记录（record）包含了如何回滚事务中对聚簇索引记录（cluster index record）的修改。如果其他事务将原始数据视为一致性读取操作的一部分，则从undo log检索未被修改的数据。</p></li>
+
+<li><p>redo log<br />
+重做日志是一个（disk-based）数据结构是在crash恢复中用来纠正要完成事务锁提交的数据。在正常的操作中，重做日志将对SQL语句或者底层api调用产生的表数据更改的请求进行编码。如果发生了异常发生，导致了某些更新没有被持久化，innoDB会在初始化的时候自动重放redo log来完成未完成的写入操作（在重新接受连接之前）。</p></li>
+</ul>
+
+<p>结合上面的两种事务日志</p>
+
+<ul>
+<li><p>在事务内对数据的每一次修改，都会记录一个相反的操作到undo log中，如果这时候发生异常或者回滚，那么innoDB根据undo log去恢复数据到事务执行之前的状态。</p></li>
+
+<li><p>当我们对事务进行commit，innoDB 会在真正提交事务之前，将对数据的每一次更改写入redo log以防止在提交之前crash导致修改丢失。</p></li>
+</ul>
+
+<h3 id="事务的隔离性">事务的隔离性</h3>
+
+<p>事务隔离分为不同级别，包括读未提交（Read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行化（Serializable）。</p>
+
+<ul>
+<li>READ UNCOMMITED; 脏读</li>
+<li>READ COMMITTED; 不可重复读</li>
+<li>REPEATABLE READ; 幻读</li>
+<li>SERIALIZABLE; 串行</li>
+</ul>
+
+<p>MySQL 中默认的隔离级别是 REPEATABLE READ;</p>
+
+<h3 id="mysql中的锁">Mysql中的锁</h3>
+
+<h4 id="shared-and-exclusive-locks">Shared and Exclusive Locks</h4>
+
+<ul>
+<li>共享锁（S）允许一个事务持有锁去读取行</li>
+<li>排他锁（X）允许事务持有锁去更新、删除行</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>Conflict</th>
+<th>S</th>
+<th>X</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>S</td>
+<td>Y</td>
+<td>N</td>
+</tr>
+
+<tr>
+<td>X</td>
+<td>N</td>
+<td>N</td>
+</tr>
+</tbody>
+</table>
+
+<p>简单的讲就是共享锁之间不互斥，共享锁于排他锁互斥，排他锁和排他锁互斥。</p>
+
+<h3 id="intention-locks">Intention Locks</h3>
+
+<ul>
+<li>意向共享锁</li>
+<li>意向排他锁<br /></li>
+</ul>
+
+<p><strong>innoDB支持多种粒度的锁，意向锁是表级别的锁，在你获取共享锁之前要给表加上意向共享锁，获取排他锁之前要给表加上意向排他锁</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>-</th>
+<th>X</th>
+<th>IX</th>
+<th>S</th>
+<th>IS</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>X</td>
+<td>Conflict</td>
+<td>Conflict</td>
+<td>Conflict</td>
+<td>Conflict</td>
+</tr>
+
+<tr>
+<td>IX</td>
+<td>Conflict</td>
+<td>Compatible</td>
+<td>Conflict</td>
+<td>Compatible</td>
+</tr>
+
+<tr>
+<td>S</td>
+<td>Conflict</td>
+<td>Conflict</td>
+<td>Compatible</td>
+<td>Compatible</td>
+</tr>
+
+<tr>
+<td>IS</td>
+<td>Conflict</td>
+<td>Compatible</td>
+<td>Compatible</td>
+<td>Compatible</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="record-locks">Record Locks</h3>
+
+<p>记录锁就是加载索引上的锁，好像是废话，重点是在 a lock on index record。<br />
+比如 <code>SELECT c1 FROM t WHERE c1 = 10 FOR UPDATE;</code> 会阻止其他任何事务去插入，更新，删除 t.c1 = 10 的记录。<br />
+记录锁总是锁住索引，甚至是一张没有定义索引的表（innoDB会自动为该表创建一个聚簇索引来让记录锁来锁）</p>
+
+<h3 id="gap-locks">Gap Locks</h3>
+
+<p>间隙锁，顾名思义，就是加在两条索引记录之间的锁，或者加载第一条索引之前、最后一条索引记录之后。<br />
+比如 <code>SELECT c1 FROM t WHERE c1 BETWEEN 10 and 20 FOR UPDATE;</code> 阻止任何其他的事务向t.c1 插入 10～20 之间的数据，不管要插入的数据是否存在，因为间隙锁会锁着整个区间。</p>
+
+<p><strong>REPEATABLE READ级别以前才会生效</strong></p>
+
+<h3 id="next-key-locks">Next-Key Locks</h3>
+
+<p>Next-Key lock 是 Record Lock 和 Gap Lock 的结合<br />
+假设一个索引包含了10，11，13 和20 ，next-key可能回锁住如下的区间。</p>
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4">(negative infinity, 10]
+(10, 11]
+(11, 13]
+(13, 20]
+(20, positive infinity)</pre></div>
+<p>InnoDB使用next-key lock 在REPEATABLE READ隔离级别来防止幽灵行（phantom rows)</p>
+
+<h4 id="insert-intention-locks">Insert Intention Locks</h4>
+
+<p>插入意向锁是在INSERT操作之前设置的一种GapLock，这个锁表示插入的意图，即插入相同索引间隙的多个事务不需要等待其他事务如果不插入间隙内的相同位置。</p>
+
+<h4 id="auto-inc-locks">AUTO-INC Locks</h4>
+
+<p>AUTO-INC是一个特殊的表级别的锁，事务向一个有AUTO_INCREASEAUTO_INCREASE列的表里面插入数据的时候将获取AUTO-INC锁。</p>
+
+<h3 id="参考">参考</h3>
+
+<ul>
+<li><a href="https://dev.mysql.com/doc/">MySQL Manual</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/mysql-acid.html">ACID</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-redo-log.html">redo log</a><br /></li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-undo-logs.html">undo log</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locking.html">lock</a></li>
+</ul>
+  </article>
+</section>
+
+
+      </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>你好，欢迎 Hello</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+       · 
+      [<a href="https://github.com/luizdepra/hugo-coder/tree/"></a>]
+    
+  </section>
+</footer>
+
+    </main>
+
+    
+
+  </body>
+
+</html>

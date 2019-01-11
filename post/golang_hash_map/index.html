@@ -1,229 +1,104 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="">
+
   <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>浅析 Golang map的内部实现</title>
-  <meta property="og:title" content="浅析 Golang map的内部实现" />
-  <meta name="twitter:title" content="浅析 Golang map的内部实现" />
-  <meta name="description" content="Go 1.8.1
+    <meta name="author" content="Wang Bing">
+    <meta name="description" content="Bing&#39;s Thinking">
+    <meta name="keywords" content="blog,developer,personal">
+
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="浅析 Golang map的内部实现"/>
+<meta name="twitter:description" content="Go 1.8.1
 hashmap代码位置： runtime/hashmap.go
 关联的maptype的位置在: runtime/type.go
 
 之前有考虑过为cutehttpd写一个map，所以就看了一下golang中map的实现，学习一下经验。
-下面是对go map代码的简单分析
-">
-  <meta property="og:description" content="Go 1.8.1
-hashmap代码位置： runtime/hashmap.go
-关联的maptype的位置在: runtime/type.go
-
-之前有考虑过为cutehttpd写一个map，所以就看了一下golang中map的实现，学习一下经验。
-下面是对go map代码的简单分析
-">
-  <meta name="twitter:description" content="Go 1.8.1
-hashmap代码位置： runtime/hashmap.go
-关联的maptype的位置在: runtime/type.go
-
-之前有考虑过为cutehttpd写一个map，所以就看了一下golang中map的实现，学习一下经验。
-下面是对go map代码的简单分析
-">
-  <meta name="author" content="Bing"/>
-  <link href='http://54niyu.github.io/img/favicon.ico' rel='icon' type='image/x-icon'/>
-  <meta property="og:image" content="http://54niyu.github.io/img/avatar-icon.png" />
-  <meta name="twitter:image" content="http://54niyu.github.io/img/avatar-icon.png" />
-  <meta name="twitter:card" content="summary" />
-  <meta property="og:url" content="http://54niyu.github.io/post/golang_hash_map/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Bing&#39;s Thinking" />
-
-  <meta name="generator" content="Hugo 0.32.4" />
-  <link rel="canonical" href="http://54niyu.github.io/post/golang_hash_map/" />
-  <link rel="alternate" href="http://54niyu.github.io/index.xml" type="application/rss+xml" title="Bing&#39;s Thinking">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" integrity="sha384-wITovz90syo1dJWVh32uuETPVEtGigN07tkttEqPv+uR2SE/mbQcG7ATL28aI9H0" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <link rel="stylesheet" href="http://54niyu.github.io/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
-  <link rel="stylesheet" href="http://54niyu.github.io/css/codeblock.css" />
-  <link rel="stylesheet" href="http://54niyu.github.io/css/highlight.min.css" />
+下面是对go map代码的简单分析"/>
 
 
+    <base href="https://54niyu.github.io/post/golang_hash_map/">
+    <title>
+  浅析 Golang map的内部实现 · Bing&#39;s Thinking
+</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.1/photoswipe.min.css" integrity="sha256-sCl5PUOGMLfFYctzDW3MtRib0ctyUvI9Qsmq2wXOeBY=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.1/default-skin/default-skin.min.css" integrity="sha256-BFeI1V+Vh1Rk37wswuOYn5lsTcaU96hGaI7OUVCLjPc=" crossorigin="anonymous" />
+    <link rel="canonical" href="https://54niyu.github.io/post/golang_hash_map/">
 
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Merriweather:300,700|Source+Code+Pro:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" integrity="sha256-oSrCnRYXvHG31SBifqP2PM1uje7SJUyX0nTwO2RJV54=" crossorigin="anonymous" />
 
-
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-<div class="pswp__bg"></div>
-
-<div class="pswp__scroll-wrap">
     
-    <div class="pswp__container">
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-    </div>
+      
+      
+      <link rel="stylesheet" href="https://54niyu.github.io/css/coder.min.a3307e096757a84995f145daccdad26307f88b657e9946d207d011e314ef1442.css" integrity="sha256-ozB&#43;CWdXqEmV8UXazNrSYwf4i2V&#43;mUbSB9AR4xTvFEI=" crossorigin="anonymous" media="screen" />
     
-    <div class="pswp__ui pswp__ui--hidden">
-    <div class="pswp__top-bar">
+
+    
+
+    
+
+    
+
+    <link rel="icon" type="image/png" href="https://54niyu.github.io/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://54niyu.github.io/images/favicon-16x16.png" sizes="16x16">
+
+    
+
+    <meta name="generator" content="Hugo 0.53" />
+  </head>
+
+  <body class=" ">
+    <main class="wrapper">
+      <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="https://54niyu.github.io">
+      Bing&#39;s Thinking
+    </a>
+    <input type="checkbox" id="menu-toggle" />
+    <label class="menu-button float-right" for="menu-toggle"><i class="fas fa-bars"></i></label>
+    <ul class="navigation-list">
       
-      <div class="pswp__counter"></div>
-      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-      <button class="pswp__button pswp__button--share" title="Share"></button>
-      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/">Blog</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/post/">Posts</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/tags/">TAGS</a>
+          </li>
+        
+          <li class="navigation-item">
+            <a class="navigation-link" href="https://54niyu.github.io/page/about">About</a>
+          </li>
+        
       
       
-      <div class="pswp__preloader">
-        <div class="pswp__preloader__icn">
-          <div class="pswp__preloader__cut">
-            <div class="pswp__preloader__donut"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-      <div class="pswp__share-tooltip"></div>
-    </div>
-    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-    </button>
-    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-    </button>
-    <div class="pswp__caption">
-      <div class="pswp__caption__center"></div>
-    </div>
-    </div>
-    </div>
-</div>
-
-</head>
-
-  <body>
-    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
-        <span class="sr-only">切换导航</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="http://54niyu.github.io/">Bing&#39;s Thinking</a>
-    </div>
-
-    <div class="collapse navbar-collapse" id="main-navbar">
-      <ul class="nav navbar-nav navbar-right">
-        
-          
-            <li>
-              <a title="Blog" href="/">Blog</a>
-            </li>
-          
-        
-          
-            <li class="navlinks-container">
-              <a class="navlinks-parent" href="javascript:void(0)">Samples</a>
-              <div class="navlinks-children">
-                
-                  <a href="/tutorial/">Hugo</a>
-                
-                  <a href="/post/">Golang</a>
-                
-              </div>
-            </li>
-          
-        
-          
-            <li>
-              <a title="TAGS" href="/tags/">TAGS</a>
-            </li>
-          
-        
-          
-            <li>
-              <a title="About" href="/page/about">About</a>
-            </li>
-          
-        
-
-        
-
-        
-      </ul>
-    </div>
-
-    <div class="avatar-container">
-      <div class="avatar-img-border">
-        
-          <a title="Bing&#39;s Thinking" href="http://54niyu.github.io/">
-            <img class="avatar-img" src="http://54niyu.github.io/img/avatar-icon.png" alt="Bing&#39;s Thinking" />
-          </a>
-        
-      </div>
-    </div>
-
-  </div>
+    </ul>
+  </section>
 </nav>
 
 
+      <div class="content">
+        
+  <section class="container page">
+  <article>
+    <header>
+      <h1>浅析 Golang map的内部实现</h1>
+    </header>
 
-
-    
-  
-  
-  
-
-
-
-
-  
-
-  <header class="header-section ">
-    
-    <div class="intro-header no-img">
-      
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <div class="post-heading">
-              <h1>浅析 Golang map的内部实现</h1>
-                
-                
-                  <span class="post-meta">
-  
-  
-  <i class="fa fa-calendar-o"></i>&nbsp;发表于 January 16, 2018
-  
-  
-  
-</span>
-
-
-                
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-
-    
-<div class="container" role="main">
-  <div class="row">
-    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-      <article role="main" class="blog-post">
-        <p>Go 1.8.1<br />
+    <p>Go 1.8.1<br />
 hashmap代码位置： runtime/hashmap.go<br />
 关联的maptype的位置在: runtime/type.go</p>
 
 <p>之前有考虑过为cutehttpd写一个map，所以就看了一下golang中map的实现，学习一下经验。
-下面是对go map代码的简单分析
-</p>
+下面是对go map代码的简单分析</p>
 
 <hr />
 
@@ -237,33 +112,30 @@ hashmap代码位置： runtime/hashmap.go<br />
 <h3 id="hmap-and-bmap">hmap and bmap</h3>
 
 <p>我们先来看一下这两个结构体的定义，我把代码里的一些注释删掉了，因为太多太长，看着有些许的乱。</p>
-
-<pre><code class="language-Go">// A header for a Go map.
-type hmap struct {
-	count     int 
-	flags     uint8
-	B         uint8
-	noverflow uint16
-	hash0     uint32
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#007f7f">// A header for a Go map.
+</span><span style="color:#007f7f"></span><span style="color:#fff;font-weight:bold">type</span> hmap <span style="color:#fff;font-weight:bold">struct</span> {
+	count     <span style="color:#fff;font-weight:bold">int</span> 
+	flags     <span style="color:#fff;font-weight:bold">uint8</span>
+	B         <span style="color:#fff;font-weight:bold">uint8</span>
+	noverflow <span style="color:#fff;font-weight:bold">uint16</span>
+	hash0     <span style="color:#fff;font-weight:bold">uint32</span>
 	buckets    unsafe.Pointer
 	oldbuckets unsafe.Pointer
-	nevacuate  uintptr        
-	overflow *[2]*[]*bmap
+	nevacuate  <span style="color:#fff;font-weight:bold">uintptr</span>        
+	overflow *[<span style="color:#ff0;font-weight:bold">2</span>]*[]*bmap
 }
-// A bucket for a Go map.
-type bmap struct {
-	tophash [bucketCnt]uint8
-}
-</code></pre>
-
+<span style="color:#007f7f">// A bucket for a Go map.
+</span><span style="color:#007f7f"></span><span style="color:#fff;font-weight:bold">type</span> bmap <span style="color:#fff;font-weight:bold">struct</span> {
+	tophash [bucketCnt]<span style="color:#fff;font-weight:bold">uint8</span>
+}</code></pre></div>
 <p><strong>count</strong>:表示map中键值的数量<br />
 <strong>B</strong>:map中buckets的长度是2的n次方， B则是那个n， buckets 的大小为 2^B<br />
 <strong>buckets</strong>:是2^B个bmap数组，里面实际存储key/val，每个bmap可以存放 8 个键值<br />
 <strong>oldbuckets</strong>:这个是rehash时候将buckets赋值给oldbucket，并创建一个新的buckets，
 并逐步地将oldbuckets中的值迁移到buckets。</p>
 
-<p>所以根据以上的结构，我们可以初步画出一个草图来表示bmap和hmap的关系
-<img src="/img/golang-map-hashmap.go.png" alt="golang-map-first-look" /></p>
+<p>所以根据以上的结构，我们可以初步画出一个草图来表示bmap和hmap的关系<br />
+<img src="https://54niyu.github.io/img/golang-map-hashmap.go.png" alt="golang-map-first-look" /></p>
 
 <p>如果我们单看hashmap.go中的定义，那么对于代码里面的一些操作就会很迷糊。<br />
 最开始我也是这样，明明bmap中只有一个topHash数组，那它是怎么存储key/val的呢，它overflow的位置又是在哪里?</p>
@@ -298,23 +170,20 @@ type bmap struct {
 </table>
 
 <hr />
-
-<pre><code class="language-Go">type maptype struct {
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#fff;font-weight:bold">type</span> maptype <span style="color:#fff;font-weight:bold">struct</span> {
     typ           _type
     key           *_type
     elem          *_type
-    bucket        *_type // internal type representing a hash bucket
-    hmap          *_type // internal type representing a hmap
-    keysize       uint8  // size of key slot
-    indirectkey   bool   // store ptr to key instead of key itself
-    valuesize     uint8  // size of value slot
-    indirectvalue bool   // store ptr to value instead of value itself
-    bucketsize    uint16 // size of bucket
-    reflexivekey  bool   // true if k==k for all keys
-    needkeyupdate bool   // true if we need to update key on an overwrite
-}
-</code></pre>
-
+    bucket        *_type <span style="color:#007f7f">// internal type representing a hash bucket
+</span><span style="color:#007f7f"></span>    hmap          *_type <span style="color:#007f7f">// internal type representing a hmap
+</span><span style="color:#007f7f"></span>    keysize       <span style="color:#fff;font-weight:bold">uint8</span>  <span style="color:#007f7f">// size of key slot
+</span><span style="color:#007f7f"></span>    indirectkey   <span style="color:#fff;font-weight:bold">bool</span>   <span style="color:#007f7f">// store ptr to key instead of key itself
+</span><span style="color:#007f7f"></span>    valuesize     <span style="color:#fff;font-weight:bold">uint8</span>  <span style="color:#007f7f">// size of value slot
+</span><span style="color:#007f7f"></span>    indirectvalue <span style="color:#fff;font-weight:bold">bool</span>   <span style="color:#007f7f">// store ptr to value instead of value itself
+</span><span style="color:#007f7f"></span>    bucketsize    <span style="color:#fff;font-weight:bold">uint16</span> <span style="color:#007f7f">// size of bucket
+</span><span style="color:#007f7f"></span>    reflexivekey  <span style="color:#fff;font-weight:bold">bool</span>   <span style="color:#007f7f">// true if k==k for all keys
+</span><span style="color:#007f7f"></span>    needkeyupdate <span style="color:#fff;font-weight:bold">bool</span>   <span style="color:#007f7f">// true if we need to update key on an overwrite
+</span><span style="color:#007f7f"></span>}</code></pre></div>
 <p>我看再来看一下maptype的类型，它里面包含了实际的bucket类型和hmap的类型<br />
 key,elem,bucket,hmap 都是一个 <strong>_type</strong>类型的指针<br />
 比如map[string]int和map[int]string<br />
@@ -325,7 +194,7 @@ key,elem,bucket,hmap 都是一个 <strong>_type</strong>类型的指针<br />
 <p>为了更好的展示他们之间的关系，我画了一张很丑很丑很丑的结构图，不过大概描述
 hmap 和 bmap 的关系</p>
 
-<p><img src="/img/golang-map-internal.png" alt="golang-map-internal" /></p>
+<p><img src="https://54niyu.github.io/img/golang-map-internal.png" alt="golang-map-internal" /></p>
 
 <hr />
 
@@ -337,41 +206,38 @@ hmap 和 bmap 的关系</p>
 <hr />
 
 <h4 id="makemap">makemap</h4>
-
-<pre><code class="language-Go">func makemap(t *maptype, hint int64, h *hmap, bucket unsafe.Pointer) *hmap {
-    // ... 删除一些开头检查参数的代码
-
-	// find size parameter which will hold the requested # of elements
-	B := uint8(0)
-	for ; overLoadFactor(hint, B); B++ {
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#fff;font-weight:bold">func</span> makemap(t *maptype, hint <span style="color:#fff;font-weight:bold">int64</span>, h *hmap, bucket unsafe.Pointer) *hmap {
+    <span style="color:#007f7f">// ... 删除一些开头检查参数的代码
+</span><span style="color:#007f7f"></span>
+	<span style="color:#007f7f">// find size parameter which will hold the requested # of elements
+</span><span style="color:#007f7f"></span>	B := <span style="color:#fff;font-weight:bold">uint8</span>(<span style="color:#ff0;font-weight:bold">0</span>)
+	<span style="color:#fff;font-weight:bold">for</span> ; overLoadFactor(hint, B); B++ {
     }
-    // 根据hint的值来算出最合适的B的值
-
-	// allocate initial hash table
-	// if B == 0, the buckets field is allocated lazily later (in mapassign)
-	// If hint is large zeroing this memory could take a while.
-	buckets := bucket
-	if B != 0 {
-		buckets = newarray(t.bucket, 1&lt;&lt;B)
+    <span style="color:#007f7f">// 根据hint的值来算出最合适的B的值
+</span><span style="color:#007f7f"></span>
+	<span style="color:#007f7f">// allocate initial hash table
+</span><span style="color:#007f7f"></span>	<span style="color:#007f7f">// if B == 0, the buckets field is allocated lazily later (in mapassign)
+</span><span style="color:#007f7f"></span>	<span style="color:#007f7f">// If hint is large zeroing this memory could take a while.
+</span><span style="color:#007f7f"></span>	buckets := bucket
+	<span style="color:#fff;font-weight:bold">if</span> B != <span style="color:#ff0;font-weight:bold">0</span> {
+		buckets = newarray(t.bucket, <span style="color:#ff0;font-weight:bold">1</span>&lt;&lt;B)
 	}
 
-	// initialize Hmap
-	if h == nil {
+	<span style="color:#007f7f">// initialize Hmap
+</span><span style="color:#007f7f"></span>	<span style="color:#fff;font-weight:bold">if</span> h == <span style="color:#fff;font-weight:bold">nil</span> {
 		h = (*hmap)(newobject(t.hmap))
 	}
-	h.count = 0
+	h.count = <span style="color:#ff0;font-weight:bold">0</span>
 	h.B = B
-	h.flags = 0
+	h.flags = <span style="color:#ff0;font-weight:bold">0</span>
 	h.hash0 = fastrand()
 	h.buckets = buckets
-	h.oldbuckets = nil
-	h.nevacuate = 0
-    h.noverflow = 0
+	h.oldbuckets = <span style="color:#fff;font-weight:bold">nil</span>
+	h.nevacuate = <span style="color:#ff0;font-weight:bold">0</span>
+    h.noverflow = <span style="color:#ff0;font-weight:bold">0</span>
 
-	return h
-}
-</code></pre>
-
+	<span style="color:#fff;font-weight:bold">return</span> h
+}</code></pre></div>
 <p>关于makemap需要注意的是<strong>newarry()</strong>和<strong>newobject()</strong>参数，顾名思义，创建一个数组、对象。
 而他们接受的参数是 t.bucket 和 t.hmap 而不是在hashmap中定义的hmap和bmap<br />
 所以不同的key/val 类型，那么t.bucket 和 t.hmap 的大小是不一样的。<br />
@@ -391,90 +257,86 @@ hmap 和 bmap 的关系</p>
 <hr />
 
 <h3 id="mapaccess1">mapaccess1</h3>
-
-<pre><code class="language-Go">func mapaccess1(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
-    // 一些检查
-	alg := t.key.alg
-	hash := alg.hash(key, uintptr(h.hash0))
-    // 计算出hash的值
-
-    m := uintptr(1)&lt;&lt;h.B - 1
-    // 掩码，假设现在是8位平台,b.B=2，那么uintptr是8位
-    // 00000001 左移2位后得到 00000100 再减去1后得到 0000011
-    // 那么hash&amp;m左边6位都是0, 最后hash&amp;m的范围就限制在 000011 ~ 000000 之间了
-    // 也就是根据的低h.B位的字节来确定bucket的位置
-    b := (*bmap)(add(h.buckets, (hash&amp;m)*uintptr(t.bucketsize)))
-    // 从h.buckets的起始位置偏移 (hash&amp;m)*uintptr(t.bucketsize) 个大小，也就到了这个hash对应的bmap位置了
-	if c := h.oldbuckets; c != nil {
-		if !h.sameSizeGrow() {
-			// There used to be half as many buckets; mask down one more power of two.
-			m &gt;&gt;= 1
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#fff;font-weight:bold">func</span> mapaccess1(t *maptype, h *hmap, key unsafe.Pointer) unsafe.Pointer {
+    <span style="color:#007f7f">// 一些检查
+</span><span style="color:#007f7f"></span>	alg := t.key.alg
+	hash := alg.hash(key, <span style="color:#fff;font-weight:bold">uintptr</span>(h.hash0))
+    <span style="color:#007f7f">// 计算出hash的值
+</span><span style="color:#007f7f"></span>
+    m := <span style="color:#fff;font-weight:bold">uintptr</span>(<span style="color:#ff0;font-weight:bold">1</span>)&lt;&lt;h.B - <span style="color:#ff0;font-weight:bold">1</span>
+    <span style="color:#007f7f">// 掩码，假设现在是8位平台,b.B=2，那么uintptr是8位
+</span><span style="color:#007f7f"></span>    <span style="color:#007f7f">// 00000001 左移2位后得到 00000100 再减去1后得到 0000011
+</span><span style="color:#007f7f"></span>    <span style="color:#007f7f">// 那么hash&amp;m左边6位都是0, 最后hash&amp;m的范围就限制在 000011 ~ 000000 之间了
+</span><span style="color:#007f7f"></span>    <span style="color:#007f7f">// 也就是根据的低h.B位的字节来确定bucket的位置
+</span><span style="color:#007f7f"></span>    b := (*bmap)(add(h.buckets, (hash&amp;m)*<span style="color:#fff;font-weight:bold">uintptr</span>(t.bucketsize)))
+    <span style="color:#007f7f">// 从h.buckets的起始位置偏移 (hash&amp;m)*uintptr(t.bucketsize) 个大小，也就到了这个hash对应的bmap位置了
+</span><span style="color:#007f7f"></span>	<span style="color:#fff;font-weight:bold">if</span> c := h.oldbuckets; c != <span style="color:#fff;font-weight:bold">nil</span> {
+		<span style="color:#fff;font-weight:bold">if</span> !h.sameSizeGrow() {
+			<span style="color:#007f7f">// There used to be half as many buckets; mask down one more power of two.
+</span><span style="color:#007f7f"></span>			m &gt;&gt;= <span style="color:#ff0;font-weight:bold">1</span>
 		}
-		oldb := (*bmap)(add(c, (hash&amp;m)*uintptr(t.bucketsize)))
-		if !evacuated(oldb) {
+		oldb := (*bmap)(add(c, (hash&amp;m)*<span style="color:#fff;font-weight:bold">uintptr</span>(t.bucketsize)))
+		<span style="color:#fff;font-weight:bold">if</span> !evacuated(oldb) {
 			b = oldb
 		}
     }
 
-    // 取hash得高8位在bmap中判断，如果不能跟bmap.tophash[]中的值匹配上，那也就说明key不在这个map
-	top := uint8(hash &gt;&gt; (sys.PtrSize*8 - 8))
-	if top &lt; minTopHash {
+    <span style="color:#007f7f">// 取hash得高8位在bmap中判断，如果不能跟bmap.tophash[]中的值匹配上，那也就说明key不在这个map
+</span><span style="color:#007f7f"></span>	top := <span style="color:#fff;font-weight:bold">uint8</span>(hash &gt;&gt; (sys.PtrSize*<span style="color:#ff0;font-weight:bold">8</span> - <span style="color:#ff0;font-weight:bold">8</span>))
+	<span style="color:#fff;font-weight:bold">if</span> top &lt; minTopHash {
 		top += minTopHash
 	}
-	for {
-		for i := uintptr(0); i &lt; bucketCnt; i++ {
-			if b.tophash[i] != top {
-				continue
+	<span style="color:#fff;font-weight:bold">for</span> {
+		<span style="color:#fff;font-weight:bold">for</span> i := <span style="color:#fff;font-weight:bold">uintptr</span>(<span style="color:#ff0;font-weight:bold">0</span>); i &lt; bucketCnt; i++ {
+			<span style="color:#fff;font-weight:bold">if</span> b.tophash[i] != top {
+				<span style="color:#fff;font-weight:bold">continue</span>
             }
 
-            // data offset should be the size of the bmap struct, but needs to be
-            // aligned correctly. For amd64p32 this means 64-bit alignment
-            // even though pointers are 32 bit.
-            // dataOffset = unsafe.Offsetof(struct {
-            //    b bmap
-            //    v int64
-            // }{}.v)
-
-            // dataOffset 计算出bmap中tophash[]的结束位置 ,这样是便于从 maytype.bmap 中跳过tophash[] 的存储位置，
-            // 因为key/val 是紧跟着tophash[] 存储的。
-
-            // 根据 bucket的起始位置+key的开始位置+每个key的大小*i，就可以定位第i个key的内存位置。
-            k := add(unsafe.Pointer(b), dataOffset+i*uintptr(t.keysize))
-            // 判断是否直接存的key，如果是间接的，那么再解除地址引用取得实际的key
-			if t.indirectkey {
+            <span style="color:#007f7f">// data offset should be the size of the bmap struct, but needs to be
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">// aligned correctly. For amd64p32 this means 64-bit alignment
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">// even though pointers are 32 bit.
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">// dataOffset = unsafe.Offsetof(struct {
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">//    b bmap
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">//    v int64
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">// }{}.v)
+</span><span style="color:#007f7f"></span>
+            <span style="color:#007f7f">// dataOffset 计算出bmap中tophash[]的结束位置 ,这样是便于从 maytype.bmap 中跳过tophash[] 的存储位置，
+</span><span style="color:#007f7f"></span>            <span style="color:#007f7f">// 因为key/val 是紧跟着tophash[] 存储的。
+</span><span style="color:#007f7f"></span>
+            <span style="color:#007f7f">// 根据 bucket的起始位置+key的开始位置+每个key的大小*i，就可以定位第i个key的内存位置。
+</span><span style="color:#007f7f"></span>            k := add(unsafe.Pointer(b), dataOffset+i*<span style="color:#fff;font-weight:bold">uintptr</span>(t.keysize))
+            <span style="color:#007f7f">// 判断是否直接存的key，如果是间接的，那么再解除地址引用取得实际的key
+</span><span style="color:#007f7f"></span>			<span style="color:#fff;font-weight:bold">if</span> t.indirectkey {
 				k = *((*unsafe.Pointer)(k))
 			}
-			if alg.equal(key, k) {
-				// 比较key是否相等
-				// 同上
-                // 根据 bucket的起始位置+key的起始位置+每个key的大小*bucketCnt(8)+每个val的大小*i，定位到第i个val的内存位置
-                v := add(unsafe.Pointer(b), dataOffset+bucketCnt*uintptr(t.keysize)+i*uintptr(t.valuesize))
-                // 同上，判断val是直接还是间接
-				if t.indirectvalue {
+			<span style="color:#fff;font-weight:bold">if</span> alg.equal(key, k) {
+				<span style="color:#007f7f">// 比较key是否相等
+</span><span style="color:#007f7f"></span>				<span style="color:#007f7f">// 同上
+</span><span style="color:#007f7f"></span>                <span style="color:#007f7f">// 根据 bucket的起始位置+key的起始位置+每个key的大小*bucketCnt(8)+每个val的大小*i，定位到第i个val的内存位置
+</span><span style="color:#007f7f"></span>                v := add(unsafe.Pointer(b), dataOffset+bucketCnt*<span style="color:#fff;font-weight:bold">uintptr</span>(t.keysize)+i*<span style="color:#fff;font-weight:bold">uintptr</span>(t.valuesize))
+                <span style="color:#007f7f">// 同上，判断val是直接还是间接
+</span><span style="color:#007f7f"></span>				<span style="color:#fff;font-weight:bold">if</span> t.indirectvalue {
 					v = *((*unsafe.Pointer)(v))
 				}
-				return v
+				<span style="color:#fff;font-weight:bold">return</span> v
 			}
         }
-        // 上面的bmap中没有找到的话 ，那么就调到下一个bmap
-        b = b.overflow(t)
-        // 没有找到，返回一个 zeroVal
-		if b == nil {
-			return unsafe.Pointer(&amp;zeroVal[0])
+        <span style="color:#007f7f">// 上面的bmap中没有找到的话 ，那么就调到下一个bmap
+</span><span style="color:#007f7f"></span>        b = b.overflow(t)
+        <span style="color:#007f7f">// 没有找到，返回一个 zeroVal
+</span><span style="color:#007f7f"></span>		<span style="color:#fff;font-weight:bold">if</span> b == <span style="color:#fff;font-weight:bold">nil</span> {
+			<span style="color:#fff;font-weight:bold">return</span> unsafe.Pointer(&amp;zeroVal[<span style="color:#ff0;font-weight:bold">0</span>])
 		}
 	}
 }
 
-func (b *bmap) overflow(t *maptype) *bmap {
-    // 从bmap的起始位置+bmap的大小-系统指针的大小。
-    // 所以不难看出 bmap 内存最末尾的一个sys.PtrSize是指向下一个bmap的指针。
-	return *(**bmap)(add(unsafe.Pointer(b), uintptr(t.bucketsize)-sys.PtrSize))
-}
-
-</code></pre>
-
+<span style="color:#fff;font-weight:bold">func</span> (b *bmap) overflow(t *maptype) *bmap {
+    <span style="color:#007f7f">// 从bmap的起始位置+bmap的大小-系统指针的大小。
+</span><span style="color:#007f7f"></span>    <span style="color:#007f7f">// 所以不难看出 bmap 内存最末尾的一个sys.PtrSize是指向下一个bmap的指针。
+</span><span style="color:#007f7f"></span>	<span style="color:#fff;font-weight:bold">return</span> *(**bmap)(add(unsafe.Pointer(b), <span style="color:#fff;font-weight:bold">uintptr</span>(t.bucketsize)-sys.PtrSize))
+}</code></pre></div>
 <p>根据上面的一些分析，那么不难得出bmap的实际内存布局了，下图所示。
-<img src="/img/golang-map-internal.png" alt="golang-map-internal" /></p>
+<img src="https://54niyu.github.io/img/golang-map-internal.png" alt="golang-map-internal" /></p>
 
 <hr />
 
@@ -494,8 +356,7 @@ func (b *bmap) overflow(t *maptype) *bmap {
 
 <p>所以只map中有一个叫<strong>loadFactor</strong>的变量，来控制map的buckets的扩容或者缩小。<br />
 下面是hashmap中的一段注释。</p>
-
-<pre><code>Picking loadFactor: too large and we have lots of overflow
+<div class="highlight"><pre style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4">Picking loadFactor: too large and we have lots of overflow
 buckets, too small and we waste a lot of space. I wrote
 a simple program to check some stats for different loads:
 (64-bit, 8 byte keys and values)
@@ -516,102 +377,39 @@ hitprobe    = # of entries to check when looking up a present key
 missprobe   = # of entries to check when looking up an absent key
 
 Keep in mind this data is for maximally loaded tables, i.e. just
-before the table grows. Typical tables will be somewhat less loaded.
-</code></pre>
-
+before the table grows. Typical tables will be somewhat less loaded.</pre></div>
 <p><strong>渐进式的rehash</strong><br />
 bmap中的<strong>oldbuckets</strong>就是rehash这个过程中存在的，当map需要扩容或者缩小，bucket会被赋值给<br />
 oldbuckets，原来的buckets变成之前的2倍或者1/2。<br />
 在每一次access或者assign，都会逐步的将oldbuckets中的bmap迁移到buckets中，知道oldbucket为空。
 这样也是避免一次性的迁移导致分配内存过多，占用过得的cpu。</p>
-      </article>
-
-      
-        <ul class="pager blog-pager">
-          
-            <li class="previous">
-              <a href="http://54niyu.github.io/post/hugo_tutorial/" data-toggle="tooltip" data-placement="top" title="使用Hugo搭建github静态博客">&larr; 前一篇</a>
-            </li>
-          
-          
-        </ul>
-      
+  </article>
+</section>
 
 
-      
-
-    </div>
-  </div>
-</div>
-
-    <footer>
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <ul class="list-inline text-center footer-links">
-          
-              <li>
-                <a href="mailto:54niyu@sina.com" title="Email me">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-          
-          <li>
-            
-            <a href="http://54niyu.github.io/index.xml" title="RSS">
-            
-              <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
-              </span>
-            </a>
-          </li>
-          
-        </ul>
-        <p class="credits copyright text-muted">
-          
-            
-              Bing
-            
-          
-
-          &nbsp;&bull;&nbsp;
-          2018
-
-          
-            &nbsp;&bull;&nbsp;
-            <a href="http://54niyu.github.io/">Bing&#39;s Thinking</a>
-          
-        </p>
-        
-        <p class="credits theme-by text-muted">
-          由 <a href="http://gohugo.io">Hugo v0.32.4</a> 强力驱动 &nbsp;&bull;&nbsp; 主题 <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> 移植自 <a href="http://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
-          
-        </p>
       </div>
-    </div>
-  </div>
+
+      <footer class="footer">
+  <section class="container">
+    
+      <p>你好，欢迎 Hello</p>
+    
+     © 2019
+    
+       · 
+      Powered by <a href="https://gohugo.io/">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/">Coder</a>.
+    
+    
+       · 
+      [<a href="https://github.com/luizdepra/hugo-coder/tree/"></a>]
+    
+  </section>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js" integrity="sha384-/y1Nn9+QQAipbNQWU65krzJralCnuOasHncUFXGkdwntGeSvQicrYkiUBwsgUqc1" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js" integrity="sha384-dq1/gEHSxPZQ7DdrM82ID4YVol9BYyU7GbWlIwnwyPzotpoc57wDw/guX8EaYGPx" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="http://54niyu.github.io/js/main.js"></script>
-<script src="http://54niyu.github.io/js/highlight.min.js"></script>
-<script> hljs.initHighlightingOnLoad(); </script><script> renderMathInElement(document.body); </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.1/photoswipe.min.js" integrity="sha256-UplRCs9v4KXVJvVY+p+RSo5Q4ilAUXh7kpjyIP5odyc=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.1/photoswipe-ui-default.min.js" integrity="sha256-PWHOlUzc96pMc8ThwRIXPn8yH4NOLu42RQ0b9SpnpFk=" crossorigin="anonymous"></script>
-<script src="http://54niyu.github.io/js/load-photoswipe.js"></script>
+    </main>
 
-
-
-
-
+    
 
   </body>
-</html>
 
+</html>
