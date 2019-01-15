@@ -3,11 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://54niyu.github.io/post/talk_mysql/</loc>
-    <lastmod>2018-06-07T00:13:58+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://54niyu.github.io/post/golang_hash_map/</loc>
     <lastmod>2018-01-16T10:21:06+08:00</lastmod>
   </url>
@@ -29,7 +24,7 @@
   
   <url>
     <loc>https://54niyu.github.io/</loc>
-    <lastmod>2018-06-07T00:13:58+08:00</lastmod>
+    <lastmod>2018-01-16T10:21:06+08:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -51,12 +46,6 @@
   </url>
   
   <url>
-    <loc>https://54niyu.github.io/tags/mysql/</loc>
-    <lastmod>2018-06-07T00:13:58+08:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://54niyu.github.io/page/</loc>
     <lastmod>2017-06-05T18:57:14+08:00</lastmod>
     <priority>0</priority>
@@ -64,7 +53,7 @@
   
   <url>
     <loc>https://54niyu.github.io/post/</loc>
-    <lastmod>2018-06-07T00:13:58+08:00</lastmod>
+    <lastmod>2018-01-16T10:21:06+08:00</lastmod>
     <priority>0</priority>
   </url>
   
