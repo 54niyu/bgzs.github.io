@@ -92,14 +92,14 @@
 
 <h3 id="innodb">innoDB</h3>
 
-<p>innoDB 是一个通用存储引擎，在高可靠和高性能取得一个平衡，MySQL自5.7版本之后被作为默认的存储引擎。
-innoDB 的优势</p>
+<p>innoDB 是一个通用存储引擎，在高可靠和高性能取得一个平衡，MySQL自5.5.8版本之后被作为默认的存储引擎。
+innoDB的优势</p>
 
 <ul>
-<li>数据库操作语言（DML）遵循ACID，事务支持commit roolback和奔溃恢复能力去保护用户数据</li>
-<li>行级别的锁和 Orace-Style的一致性读操作提升多用户的并发和性能</li>
-<li>innoDB使用主键优化查询磁盘</li>
-<li>支持外键约束</li>
+<li>数据库操作语言（DML）遵循ACID，支持事务</li>
+<li>行级别的锁和类似Orace的一致性读，提升多用户的并发和性能<br /></li>
+<li>innoDB的每个表都有一个被称为聚簇索引的主键索引，用于组织数据以最大限度地减少主键查询的IO<br /></li>
+<li>支持外键约束<br /></li>
 </ul>
 
 <h3 id="acid">ACID</h3>
@@ -112,39 +112,280 @@ Durability（持久性）：事务处理结束后，对数据的修改就是永�
 <p>谈一下我个人对这4个特性的理解：
 我们使用事务的一个主要原因是保证一个事务内的所有操作，要么全部成功，要么全部失败，也就是 Atomicity的表现。而在事务提交或回滚之后，数据库处于一个一致的状态 Consistency ，要么是包含已经提交事务修改后的数据库，或者是因为事务回滚返回到事务执行之前的数据库，不会出现其他状态。而Durability则意味着事务提交的更改是永久的，由于数据库可能因为异常而奔溃，也需要保证提交的事务一定会被持久化到文件中。而隔离性更多的是描述不同事务之间对事务内未提交或者已经提交修改的可见程序，不同的隔离级别会有脏读，不可重复读，幻读之类的问题，也会影响到事务的原子性，较低的隔离级别可能会造成事务的联机回滚或者不可回滚。</p>
 
-<h3 id="事务的原子性-持久性">事务的原子性，持久性</h3>
-
-<p>在很多系统中，尤其是在数据库或者是分布式系统中，我们会发现日志很重要，MySQL的很多特性都是要借助于日志来实现。
-在innoDB中，有两种重要的日志，下面是一段官方文档描述。</p>
-
-<ul>
-<li><p>undo log<br />
-回滚日志是跟一个事务相关的回滚日志记录（record)的集合。一条回滚日志记录（record）包含了如何回滚事务中对聚簇索引记录（cluster index record）的修改。如果其他事务将原始数据视为一致性读取操作的一部分，则从undo log检索未被修改的数据。</p></li>
-
-<li><p>redo log<br />
-重做日志是一个（disk-based）数据结构是在crash恢复中用来纠正要完成事务锁提交的数据。在正常的操作中，重做日志将对SQL语句或者底层api调用产生的表数据更改的请求进行编码。如果发生了异常发生，导致了某些更新没有被持久化，innoDB会在初始化的时候自动重放redo log来完成未完成的写入操作（在重新接受连接之前）。</p></li>
-</ul>
-
-<p>结合上面的两种事务日志</p>
-
-<ul>
-<li><p>在事务内对数据的每一次修改，都会记录一个相反的操作到undo log中，如果这时候发生异常或者回滚，那么innoDB根据undo log去恢复数据到事务执行之前的状态。</p></li>
-
-<li><p>当我们对事务进行commit，innoDB 会在真正提交事务之前，将对数据的每一次更改写入redo log以防止在提交之前crash导致修改丢失。</p></li>
-</ul>
-
-<h3 id="事务的隔离性">事务的隔离性</h3>
+<h3 id="事务的隔离性-isolation">事务的隔离性（Isolation）</h3>
 
 <p>事务隔离分为不同级别，包括读未提交（Read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行化（Serializable）。</p>
 
-<ul>
-<li>READ UNCOMMITED; 脏读</li>
-<li>READ COMMITTED; 不可重复读</li>
-<li>REPEATABLE READ; 幻读</li>
-<li>SERIALIZABLE; 串行</li>
-</ul>
+<p>我们先准备如下的user表，包含了表格中的数据</p>
 
-<p>MySQL 中默认的隔离级别是 REPEATABLE READ;</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>yy</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>xx</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>kk</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>jj</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="read-uncommited">READ UNCOMMITED;</h4>
+
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>begin;</td>
+<td>begin;</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>select name from user where id = 0; name = &lsquo;yy&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>-</td>
+<td>update user set name = &lsquo;xx&rsquo; where  id = 0; name = &lsquo;xx&rsquo;</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>select name from user where id = 0; name = &lsquo;xx&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>commit;</td>
+<td>rollback;</td>
+</tr>
+</tbody>
+</table>
+
+<p>READ COMMITED 是最低的隔离级别，可以说是不符合隔离性的要求，生产环境一般不会使用。<br />
+在该隔离级别下，一个事务可以读取其他事务未提交的修改，也就是脏读。<br />
+如上的流程中，A可以读取到B中未提交的事务，如果B在第4步执行的是rollback ，那么A就会读取到错误的信息</p>
+
+<h3 id="read-committed">READ COMMITTED;</h3>
+
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>begin;</td>
+<td>begin;</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>select name from user where id = 0; name = &lsquo;yy&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>-</td>
+<td>update user set name = &lsquo;xx&rsquo; where  id = 0; name = &lsquo;xx&rsquo;</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>select name from user where id = 0; name = &lsquo;yy&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>-</td>
+<td>commit;</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>select name from user where id = 0; name = &lsquo;xx&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>6</td>
+<td>commit;</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+
+<p>在该隔离级别下，一个事务只能读取到其他事务已经提交的数据。<br />
+在第3中，虽然B已经对id=0的name进行更新，但是由于B事务没有提交，那么A中是看不到B中的未提交修改，那么A在第3步读取到的依然是 name=‘xx&rsquo;。一旦当B提交了事务，A在第5步就可以读取到B已经修改的值。这会造成一个问题，在事务开始跟事务结束，A中却读取到了不一样的值，也就存在不可重复读的问题。</p>
+
+<h4 id="repeatable-read">REPEATABLE READ；</h4>
+
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>begin;</td>
+<td>begin;</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>select name from user where id = 0; name = &lsquo;yy&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>-</td>
+<td>update user set name = &lsquo;xx&rsquo; where  id = 0; name = &lsquo;xx&rsquo;</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>select name from user where id = 0; name = &lsquo;yy&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>-</td>
+<td>commit;</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>select name from user where id = 0; name = &lsquo;yy&rsquo;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>6</td>
+<td>commit;</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+
+<p>innoDB默认的隔离级别，在该级别下，可以解决上个一级别中不可重复读的问题。<br />
+A事务中从开始到结束对<code>id=0</code>的读取结果都是一致，这里会涉及到innoDB的MVVC和一致性读的问题，后面我们再展开。
+这个级别下面，可能会出现幻读，其实更应该叫做幻行。</p>
+
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>A</th>
+<th>B</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>0</td>
+<td>begin;</td>
+<td>begin;</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td>select name from user where id between 1 and 4;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>-</td>
+<td>insert into user values(3,&lsquo;ii&rsquo;);</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>-</td>
+<td>commit;</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>select name from user where id between 1 and 4;</td>
+<td>-</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>commit;</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+
+<blockquote>
+<p>The so-called phantom problem occurs within a transaction when the same query produces different sets of rows at different times. For example, if a SELECT is executed twice, but returns a row the second time that was not returned the first time, the row is a “phantom” row.</p>
+</blockquote>
+
+<p>上面是MySQL官方文档对幻行的解释，大概的意思是在事务中相同的查询查询多次会返回不同的结果，比如说第二次select返回了第一次select不存在的数据，这叫做幻读。<br />
+根据官方的解释，在如上的流程中，B对user的修改是插入，那么A中第1，4步骤中的两次读取的数据结果应该是不一样，第4步的查询会多出了一行 (3,&lsquo;ii&rsquo;) ，也就是所谓幻行。</p>
+
+<p>但是在 <strong>实际(RP级别)</strong> 的测试中，由于innoDB会使用一致性读，在1，4两个步骤中读取到了相同的数据集合，并没有出现我们在事务B中插入的 (3,&lsquo;ii&rsquo;)记录，这一点需要再研究一下。</p>
+
+<p>如果我们想阻止其他事务在该区间的插入，可以将A中<code>select name from user where id between 1 and 4;</code>改成 <code>select name from user where id between 1 and 4 lock in share mode</code>, 显示的给 1、4、1-4之间的间隙都加上共享锁，阻止其他事务对该区间的插入。innoDB使用会next-key lock的锁解决了幻行的问题，这是跟其他数据库不同的地方（其他数据库需要在serializable级别下才会解决幻行的问题）。</p>
+
+<h4 id="serializable">SERIALIZABLE;</h4>
+
+<p>串行，不再支持一致性非锁定读取，innoBD为每一句查询都显示的加上 <code>lock in share mode</code>。</p>
+
+<h3 id="一致性读与mvvc">一致性读与MVVC</h3>
+
+<p><img src="https://54niyu.github.io/img/consisten-read.png" alt="consistent-read" /></p>
+
+<p>在RC和PR隔离级别中，innoDB会默认使用一致性读，innoDB通过多版本控制的方式来读取当前时间数据库中的数据。如果读取的行正在进行Update或者Delete操作，这时候读取并不会等待这一行锁的释放，而是通过读取数据库中某个时间点的快照。<br />
+由于数据库快照不会加锁，也就意味着读取不会被阻塞。<br />
+在不同的隔离级别下，读取快照的时间点也有所不同，在ReadCommited级别下，会读取该行记录最新的提交事务的更改，在Repeatable Read级别下，会读取事务开始点那行的最新的快照版本。</p>
 
 <h3 id="mysql中的锁">Mysql中的锁</h3>
 
@@ -179,7 +420,7 @@ Durability（持久性）：事务处理结束后，对数据的修改就是永�
 </tbody>
 </table>
 
-<p>简单的讲就是共享锁之间不互斥，共享锁于排他锁互斥，排他锁和排他锁互斥。</p>
+<p>简单的讲就是共享锁之间不互斥，共享锁与排他锁互斥，排他锁和排他锁互斥。</p>
 
 <h3 id="intention-locks">Intention Locks</h3>
 
@@ -268,9 +509,31 @@ Durability（持久性）：事务处理结束后，对数据的修改就是永�
 
 <p>AUTO-INC是一个特殊的表级别的锁，事务向一个有AUTO_INCREASEAUTO_INCREASE列的表里面插入数据的时候将获取AUTO-INC锁。</p>
 
+<h3 id="事务的原子性-持久性">事务的原子性，持久性</h3>
+
+<p>在很多系统中，尤其是在数据库或者是分布式系统中，我们会发现日志很重要，MySQL的很多特性都是要借助于日志来实现。
+在innoDB中，有两种重要的日志，下面是一段官方文档描述。</p>
+
+<ul>
+<li><p>undo log<br />
+回滚日志是跟一个事务相关的回滚日志记录（record)的集合。一条回滚日志记录（record）包含了如何回滚事务中对聚簇索引记录（cluster index record）的修改。如果其他事务将原始数据视为一致性读取操作的一部分，则从undo log检索未被修改的数据。</p></li>
+
+<li><p>redo log<br />
+重做日志是一个（disk-based）数据结构是在crash恢复中用来纠正要完成事务锁提交的数据。在正常的操作中，重做日志将对SQL语句或者底层api调用产生的表数据更改的请求进行编码。如果发生了异常发生，导致了某些更新没有被持久化，innoDB会在初始化的时候自动重放redo log来完成未完成的写入操作（在重新接受连接之前）。</p></li>
+</ul>
+
+<p>结合上面的两种事务日志</p>
+
+<ul>
+<li><p>在事务内对数据的每一次修改，都会记录一个相反的操作到undo log中，如果这时候发生异常或者回滚，那么innoDB根据undo log去恢复数据到事务执行之前的状态。</p></li>
+
+<li><p>当我们对事务进行commit，innoDB 会在真正提交事务之前，将对数据的每一次更改写入redo log以防止在提交之前crash导致修改丢失。</p></li>
+</ul>
+
 <h3 id="参考">参考</h3>
 
 <ul>
+<li>MySQL技术内幕（innoDB存储引擎）</li>
 <li><a href="https://dev.mysql.com/doc/">MySQL Manual</a></li>
 <li><a href="https://dev.mysql.com/doc/refman/5.7/en/mysql-acid.html">ACID</a></li>
 <li><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-redo-log.html">redo log</a><br /></li>
